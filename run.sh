@@ -122,6 +122,22 @@ run_benchmark() {
             [[ ! -f "$src" ]] && return 1
             # Use local hemlockc if available, otherwise system hemlockc
             local hemlockc_bin="${HEMLOCKC_BIN:-hemlockc}"
+            # Runtime paths - check for local hemlock build or use HEMLOCK_RUNTIME env var
+            local runtime_dir="${HEMLOCK_RUNTIME:-}"
+            if [[ -z "$runtime_dir" ]]; then
+                # Try common locations
+                for dir in "$SCRIPT_DIR/../hemlock" "$HOME/Projects/hemlock"; do
+                    if [[ -f "$dir/libhemlock_runtime.so" ]]; then
+                        runtime_dir="$dir"
+                        break
+                    fi
+                done
+            fi
+            if [[ -n "$runtime_dir" ]]; then
+                export C_INCLUDE_PATH="${runtime_dir}/runtime/include:${C_INCLUDE_PATH:-}"
+                export LIBRARY_PATH="${runtime_dir}:${LIBRARY_PATH:-}"
+                export LD_LIBRARY_PATH="${runtime_dir}:${LD_LIBRARY_PATH:-}"
+            fi
             # Compile with optimization
             "$hemlockc_bin" -O3 "$src" -o "$bin" 2>/dev/null || return 1
             for ((i=0; i<ITERATIONS; i++)); do
