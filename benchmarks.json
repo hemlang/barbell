@@ -1,0 +1,51 @@
+{
+  "benchmarks": {
+    "fib": {
+      "description": "Recursive Fibonacci",
+      "default_input": 35,
+      "quick_input": 25
+    },
+    "array_sum": {
+      "description": "Sum of large array",
+      "default_input": 10000000,
+      "quick_input": 1000000
+    },
+    "string_concat": {
+      "description": "String concatenation",
+      "default_input": 100000,
+      "quick_input": 10000
+    },
+    "primes_sieve": {
+      "description": "Sieve of Eratosthenes",
+      "default_input": 1000000,
+      "quick_input": 100000
+    }
+  },
+  "languages": {
+    "c": {
+      "extension": ".c",
+      "compile": "gcc -O3 -o {out} {src}",
+      "run": "./{out} {input}"
+    },
+    "hemlock": {
+      "extension": ".hml",
+      "compile": null,
+      "run": "hemlock {src} {input}"
+    },
+    "hemlockc": {
+      "extension": ".hml",
+      "compile": "hemlock --compile-c -o {out} {src}",
+      "run": "./{out} {input}"
+    },
+    "python": {
+      "extension": ".py",
+      "compile": null,
+      "run": "python3 {src} {input}"
+    },
+    "javascript": {
+      "extension": ".js",
+      "compile": null,
+      "run": "node {src} {input}"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+// Sieve of Eratosthenes benchmark - Hemlock
+
+fn parse_int(s) {
+    let val = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        val = val * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return val;
+}
+
+let limit = 1000000;
+if (args.length > 1) {
+    limit = parse_int(args[1]);
+}
+
+// Initialize sieve array
+let sieve = [];
+let i = 0;
+while (i <= limit) {
+    sieve.push(false);
+    i = i + 1;
+}
+
+// Mark composites
+i = 2;
+while (i * i <= limit) {
+    if (!sieve[i]) {
+        let j = i * i;
+        while (j <= limit) {
+            sieve[j] = true;
+            j = j + i;
+        }
+    }
+    i = i + 1;
+}
+
+// Count primes
+let count = 0;
+i = 2;
+while (i <= limit) {
+    if (!sieve[i]) {
+        count = count + 1;
+    }
+    i = i + 1;
+}
+
+print(count);

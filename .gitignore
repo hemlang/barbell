@@ -1,0 +1,10 @@
+# Build artifacts
+/build/
+*.o
+*.out
+
+# Results
+/results/
+
+# OS files
+.DS_Store

@@ -1,0 +1,28 @@
+// String concatenation benchmark - Hemlock
+
+fn parse_int(s) {
+    let val = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        val = val * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return val;
+}
+
+let count = 100000;
+if (args.length > 1) {
+    count = parse_int(args[1]);
+}
+
+let str = "";
+let i = 0;
+while (i < count) {
+    str = str + "a";
+    i = i + 1;
+}
+
+print(str.length);
