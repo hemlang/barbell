@@ -164,6 +164,15 @@ run_benchmark() {
                 count=$((count + 1))
             done
             ;;
+        ruby)
+            local src="$bench_dir/${bench}.rb"
+            [[ ! -f "$src" ]] && return 1
+            for ((i=0; i<ITERATIONS; i++)); do
+                t=$(time_cmd ruby "$src" "$input")
+                sum=$((sum + t))
+                count=$((count + 1))
+            done
+            ;;
     esac
 
     [[ $count -eq 0 ]] && return 1
@@ -189,7 +198,7 @@ run_all() {
         benchmarks="fib array_sum string_concat primes_sieve"
     fi
 
-    local languages="c hemlockc hemlock python javascript"
+    local languages="c hemlockc hemlock python javascript ruby"
 
     echo -e "${BOLD}barbell${NC} - Hemlock Benchmark Suite"
     echo ""
