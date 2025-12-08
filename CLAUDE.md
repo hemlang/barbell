@@ -1,7 +1,7 @@
 # Barbell - Hemlock Benchmark Suite
 
 ## Purpose
-Barbell is a benchmark suite for comparing Hemlock's performance against C, Python, and JavaScript.
+Barbell is a benchmark suite for comparing Hemlock's performance against C, Python, and JavaScript. Includes both interpreted Hemlock and compiled Hemlock (hemlockc) benchmarks.
 
 ## Running Benchmarks
 
@@ -17,6 +17,9 @@ Barbell is a benchmark suite for comparing Hemlock's performance against C, Pyth
 
 # Use local hemlock build
 HEMLOCK_BIN="../hemlock/hemlock" ./run.sh
+
+# Use local hemlockc (compiled hemlock) build
+HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 ```
 
 ## Benchmarks
@@ -30,12 +33,18 @@ HEMLOCK_BIN="../hemlock/hemlock" ./run.sh
 
 ### Hemlock Performance Observations
 
-Initial benchmarks show Hemlock is significantly slower than Python/JS on compute-heavy tasks:
-- fib: ~46x slower than C, ~20x slower than Python
-- array operations: Very slow due to interpreted bytecode
+**Interpreted Hemlock** is significantly slower than Python/JS on compute-heavy tasks:
+- fib: ~30x slower than C
+- array operations: ~138x slower than C (bytecode interpretation overhead)
 - string_concat: Competitive with other languages
 
-This provides a baseline for future optimization work.
+**Compiled Hemlock (hemlockc)** shows substantial improvement over interpreted:
+- fib: ~3-5x slower than C (9x faster than interpreted)
+- array_sum: ~3x slower than C (40x faster than interpreted)
+- string_concat: Near C performance (~1.1x)
+- primes_sieve: ~1.5x slower than C (12x faster than interpreted)
+
+This demonstrates that hemlockc provides significant performance gains for compute-heavy tasks.
 
 ### Hemlock Quirks Discovered
 

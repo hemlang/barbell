@@ -116,6 +116,20 @@ run_benchmark() {
                 count=$((count + 1))
             done
             ;;
+        hemlockc)
+            local src="$bench_dir/${bench}.hml"
+            local bin="$BUILD_DIR/${bench}_hemlockc"
+            [[ ! -f "$src" ]] && return 1
+            # Use local hemlockc if available, otherwise system hemlockc
+            local hemlockc_bin="${HEMLOCKC_BIN:-hemlockc}"
+            # Compile with optimization
+            "$hemlockc_bin" -O3 "$src" -o "$bin" 2>/dev/null || return 1
+            for ((i=0; i<ITERATIONS; i++)); do
+                t=$(time_cmd "$bin" "$input")
+                sum=$((sum + t))
+                count=$((count + 1))
+            done
+            ;;
         python)
             local src="$bench_dir/${bench}.py"
             [[ ! -f "$src" ]] && return 1
@@ -159,7 +173,7 @@ run_all() {
         benchmarks="fib array_sum string_concat primes_sieve"
     fi
 
-    local languages="c hemlock python javascript"
+    local languages="c hemlockc hemlock python javascript"
 
     echo -e "${BOLD}barbell${NC} - Hemlock Benchmark Suite"
     echo ""
