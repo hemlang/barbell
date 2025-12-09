@@ -1,0 +1,36 @@
+// HTTP throughput benchmark - Hemlock implementation
+// Uses Hemlock's built-in HTTP server support
+
+fn main() {
+    let port_str = args[1];
+    let port = parse_int(port_str);
+
+    // Create HTTP server
+    let server = http_server(port);
+
+    // Register route handler
+    server.on("GET", "/", fn(req, res) {
+        res.json({ message: "Hello World!" });
+    });
+
+    // Signal ready
+    print("READY " + port_str);
+
+    // Start server (blocks)
+    server.listen();
+}
+
+fn parse_int(s) {
+    let result = 0;
+    let i = 0;
+    while (i < s.length) {
+        let ch = s[i];
+        let code: i32 = ch;
+        let digit = code - 48;
+        result = result * 10 + digit;
+        i = i + 1;
+    }
+    return result;
+}
+
+main();

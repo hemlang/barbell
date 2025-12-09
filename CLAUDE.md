@@ -28,6 +28,7 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **array_sum** - Sum large array (memory, iteration)
 - **string_concat** - String concatenation (allocation, GC pressure)
 - **primes_sieve** - Sieve of Eratosthenes (array access, loops)
+- **http_throughput** - HTTP server request throughput (real-world I/O, networking)
 
 ## Notes
 

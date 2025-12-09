@@ -28,7 +28,7 @@ usage() {
     echo "  --iter N        Number of iterations (default: 3)"
     echo "  --help, -h      Show this help"
     echo ""
-    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve"
+    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, http_throughput"
     echo "            (leave empty to run all)"
 }
 
@@ -71,6 +71,10 @@ get_input() {
             ;;
         primes_sieve)
             [[ $QUICK_MODE -eq 1 ]] && echo 100000 || echo 1000000
+            ;;
+        http_throughput)
+            # Number of requests (keep low due to connection overhead)
+            [[ $QUICK_MODE -eq 1 ]] && echo 500 || echo 2000
             ;;
     esac
 }
@@ -179,6 +183,126 @@ run_benchmark() {
     echo $((sum / count))
 }
 
+# Run HTTP throughput benchmark (special handling - measures requests/second)
+run_http_benchmark() {
+    local lang=$1
+    local num_requests=$2
+    local bench_dir="$SCRIPT_DIR/benchmarks/http_throughput"
+    local client="$bench_dir/http_client.py"
+    local port=8765
+    local sum=0
+    local count=0
+    local server_pid
+
+    # Find an available port
+    while netstat -tuln 2>/dev/null | grep -q ":$port " || ss -tuln 2>/dev/null | grep -q ":$port "; do
+        port=$((port + 1))
+    done
+
+    for ((i=0; i<ITERATIONS; i++)); do
+        # Start server based on language
+        case $lang in
+            c)
+                local src="$bench_dir/http_throughput.c"
+                local bin="$BUILD_DIR/http_throughput_c"
+                [[ ! -f "$src" ]] && return 1
+                gcc -O3 -o "$bin" "$src" 2>/dev/null || return 1
+                "$bin" "$port" &
+                server_pid=$!
+                ;;
+            hemlock)
+                local src="$bench_dir/http_throughput.hml"
+                [[ ! -f "$src" ]] && return 1
+                local hemlock_bin="${HEMLOCK_BIN:-hemlock}"
+                "$hemlock_bin" "$src" "$port" &
+                server_pid=$!
+                ;;
+            hemlockc)
+                local src="$bench_dir/http_throughput.hml"
+                local bin="$BUILD_DIR/http_throughput_hemlockc"
+                [[ ! -f "$src" ]] && return 1
+                local hemlockc_bin="${HEMLOCKC_BIN:-hemlockc}"
+                local runtime_dir="${HEMLOCK_RUNTIME:-}"
+                if [[ -z "$runtime_dir" ]]; then
+                    for dir in "$SCRIPT_DIR/../hemlock" "$HOME/Projects/hemlock"; do
+                        if [[ -f "$dir/libhemlock_runtime.so" ]]; then
+                            runtime_dir="$dir"
+                            break
+                        fi
+                    done
+                fi
+                if [[ -n "$runtime_dir" ]]; then
+                    export C_INCLUDE_PATH="${runtime_dir}/runtime/include:${C_INCLUDE_PATH:-}"
+                    export LIBRARY_PATH="${runtime_dir}:${LIBRARY_PATH:-}"
+                    export LD_LIBRARY_PATH="${runtime_dir}:${LD_LIBRARY_PATH:-}"
+                fi
+                "$hemlockc_bin" -O3 "$src" -o "$bin" 2>/dev/null || return 1
+                "$bin" "$port" &
+                server_pid=$!
+                ;;
+            python)
+                local src="$bench_dir/http_throughput.py"
+                [[ ! -f "$src" ]] && return 1
+                python3 "$src" "$port" &
+                server_pid=$!
+                ;;
+            javascript)
+                local src="$bench_dir/http_throughput.js"
+                [[ ! -f "$src" ]] && return 1
+                node "$src" "$port" &
+                server_pid=$!
+                ;;
+            ruby)
+                local src="$bench_dir/http_throughput.rb"
+                [[ ! -f "$src" ]] && return 1
+                ruby "$src" "$port" &
+                server_pid=$!
+                ;;
+            *)
+                return 1
+                ;;
+        esac
+
+        # Wait for server to be ready (max 5 seconds)
+        local ready=0
+        for ((j=0; j<50; j++)); do
+            if curl -s --max-time 1 "http://127.0.0.1:$port/" >/dev/null 2>&1; then
+                ready=1
+                break
+            fi
+            sleep 0.1
+        done
+
+        if [[ $ready -eq 0 ]]; then
+            kill "$server_pid" 2>/dev/null
+            wait "$server_pid" 2>/dev/null
+            return 1
+        fi
+
+        # Run client and get requests/second
+        local rps
+        rps=$(python3 "$client" --port "$port" --requests "$num_requests" 2>/dev/null)
+
+        # Stop server
+        kill "$server_pid" 2>/dev/null
+        wait "$server_pid" 2>/dev/null
+
+        if [[ -n "$rps" ]]; then
+            # Convert to integer for averaging (multiply by 100 for precision)
+            local rps_int=$(echo "$rps * 100" | bc | cut -d. -f1)
+            sum=$((sum + rps_int))
+            count=$((count + 1))
+        fi
+
+        # Small delay between iterations
+        sleep 0.2
+    done
+
+    [[ $count -eq 0 ]] && return 1
+    # Return average (divide by 100 to get back to original scale)
+    echo "scale=2; $sum / $count / 100" | bc
+}
+
 # Format time nicely
 format_time() {
     local ms=$1
@@ -195,7 +319,7 @@ run_all() {
     if [[ -n "$BENCHMARK" ]]; then
         benchmarks="$BENCHMARK"
     else
-        benchmarks="fib array_sum string_concat primes_sieve"
+        benchmarks="fib array_sum string_concat primes_sieve http_throughput"
     fi
 
     local languages="c hemlockc hemlock python javascript ruby"
@@ -208,25 +332,49 @@ run_all() {
 
     for bench in $benchmarks; do
         local input=$(get_input "$bench")
-        echo -e "${BOLD}${BLUE}$bench${NC} (n=$input)"
-        echo "─────────────────────────────────"
 
-        local c_time=0
+        if [[ "$bench" == "http_throughput" ]]; then
+            echo -e "${BOLD}${BLUE}$bench${NC} (requests=$input)"
+            echo "─────────────────────────────────"
 
-        for lang in $languages; do
-            local time_ms
-            time_ms=$(run_benchmark "$bench" "$lang" "$input" 2>/dev/null) || continue
+            local c_rps=0
 
-            [[ $lang == "c" ]] && c_time=$time_ms
+            for lang in $languages; do
+                local rps
+                rps=$(run_http_benchmark "$lang" "$input" 2>/dev/null) || continue
 
-            local formatted=$(format_time "$time_ms")
-            local ratio=""
-            if [[ $c_time -gt 0 && $lang != "c" ]]; then
-                ratio=$(printf " (%.1fx)" "$(echo "scale=1; $time_ms / $c_time" | bc)")
-            fi
+                [[ $lang == "c" ]] && c_rps=$(echo "$rps" | bc)
 
-            printf "  %-12s %8s%s\n" "$lang" "$formatted" "$ratio"
-        done
+                local formatted=$(printf "%.0f req/s" "$rps")
+                local ratio=""
+                if [[ $(echo "$c_rps > 0" | bc) -eq 1 && $lang != "c" ]]; then
+                    # For throughput, higher is better, so ratio < 1 means slower
+                    ratio=$(printf " (%.2fx)" "$(echo "scale=2; $rps / $c_rps" | bc)")
+                fi
+
+                printf "  %-12s %12s%s\n" "$lang" "$formatted" "$ratio"
+            done
+        else
+            echo -e "${BOLD}${BLUE}$bench${NC} (n=$input)"
+            echo "─────────────────────────────────"
+
+            local c_time=0
+
+            for lang in $languages; do
+                local time_ms
+                time_ms=$(run_benchmark "$bench" "$lang" "$input" 2>/dev/null) || continue
+
+                [[ $lang == "c" ]] && c_time=$time_ms
+
+                local formatted=$(format_time "$time_ms")
+                local ratio=""
+                if [[ $c_time -gt 0 && $lang != "c" ]]; then
+                    ratio=$(printf " (%.1fx)" "$(echo "scale=1; $time_ms / $c_time" | bc)")
+                fi
+
+                printf "  %-12s %8s%s\n" "$lang" "$formatted" "$ratio"
+            done
+        fi
         echo ""
     done
 }
