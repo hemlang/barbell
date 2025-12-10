@@ -30,6 +30,7 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **primes_sieve** - Sieve of Eratosthenes (array access, loops)
 - **json_serialize** - JSON serialization (object creation, string building)
 - **json_deserialize** - JSON parsing (string parsing, object creation)
+- **regex_match** - Regular expression matching on large text (pattern matching, string scanning)
 
 ## Notes
 

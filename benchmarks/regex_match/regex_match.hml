@@ -1,0 +1,340 @@
+// Regex matching benchmark - Hemlock
+// Since Hemlock doesn't have built-in regex, we implement pattern matchers manually
+
+fn parse_int(s) {
+    let val = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        val = val * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return val;
+}
+
+fn is_digit(ch) {
+    let code: i32 = ch;
+    let zero: i32 = '0';
+    let nine: i32 = '9';
+    return code >= zero && code <= nine;
+}
+
+fn is_lower(ch) {
+    let code: i32 = ch;
+    let a: i32 = 'a';
+    let z: i32 = 'z';
+    return code >= a && code <= z;
+}
+
+fn is_upper(ch) {
+    let code: i32 = ch;
+    let a: i32 = 'A';
+    let z: i32 = 'Z';
+    return code >= a && code <= z;
+}
+
+fn is_alpha(ch) {
+    return is_lower(ch) || is_upper(ch);
+}
+
+fn is_alnum(ch) {
+    return is_alpha(ch) || is_digit(ch);
+}
+
+fn is_email_char(ch) {
+    if (is_alnum(ch)) { return true; }
+    if (ch == '.') { return true; }
+    if (ch == '_') { return true; }
+    if (ch == '%') { return true; }
+    if (ch == '+') { return true; }
+    if (ch == '-') { return true; }
+    return false;
+}
+
+fn is_domain_char(ch) {
+    if (is_alnum(ch)) { return true; }
+    if (ch == '.') { return true; }
+    if (ch == '-') { return true; }
+    return false;
+}
+
+fn is_url_char(ch) {
+    if (is_alnum(ch)) { return true; }
+    if (ch == '/') { return true; }
+    if (ch == '?') { return true; }
+    if (ch == '=') { return true; }
+    if (ch == '&') { return true; }
+    if (ch == '.') { return true; }
+    if (ch == '_') { return true; }
+    if (ch == '-') { return true; }
+    return false;
+}
+
+// Match email pattern: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
+fn match_email(text, start) {
+    let pos = start;
+    let local_len = 0;
+
+    // Match local part
+    while (pos < text.length && is_email_char(text[pos])) {
+        local_len = local_len + 1;
+        pos = pos + 1;
+    }
+    if (local_len == 0) { return -1; }
+
+    // Match @
+    if (pos >= text.length || text[pos] != '@') { return -1; }
+    pos = pos + 1;
+
+    // Match domain
+    let domain_len = 0;
+    let last_dot = -1;
+    let domain_start = pos;
+    while (pos < text.length && is_domain_char(text[pos])) {
+        if (text[pos] == '.') {
+            last_dot = pos - domain_start;
+        }
+        domain_len = domain_len + 1;
+        pos = pos + 1;
+    }
+    if (domain_len < 3 || last_dot < 1) { return -1; }
+
+    return pos;
+}
+
+// Match phone pattern: [0-9]{3}-[0-9]{4}
+fn match_phone(text, start) {
+    let pos = start;
+
+    // Match 3 digits
+    let i = 0;
+    while (i < 3) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    // Match dash
+    if (pos >= text.length || text[pos] != '-') { return -1; }
+    pos = pos + 1;
+
+    // Match 4 digits
+    i = 0;
+    while (i < 4) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    return pos;
+}
+
+// Match date pattern: [0-9]{4}-[0-9]{2}-[0-9]{2}
+fn match_date(text, start) {
+    let pos = start;
+
+    // Match 4 digits (year)
+    let i = 0;
+    while (i < 4) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    // Match dash
+    if (pos >= text.length || text[pos] != '-') { return -1; }
+    pos = pos + 1;
+
+    // Match 2 digits (month)
+    i = 0;
+    while (i < 2) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    // Match dash
+    if (pos >= text.length || text[pos] != '-') { return -1; }
+    pos = pos + 1;
+
+    // Match 2 digits (day)
+    i = 0;
+    while (i < 2) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    return pos;
+}
+
+// Match price pattern: \$[0-9]+\.[0-9]{2}
+fn match_price(text, start) {
+    let pos = start;
+
+    // Match $
+    if (pos >= text.length || text[pos] != '$') { return -1; }
+    pos = pos + 1;
+
+    // Match digits
+    let digit_count = 0;
+    while (pos < text.length && is_digit(text[pos])) {
+        digit_count = digit_count + 1;
+        pos = pos + 1;
+    }
+    if (digit_count == 0) { return -1; }
+
+    // Match dot
+    if (pos >= text.length || text[pos] != '.') { return -1; }
+    pos = pos + 1;
+
+    // Match 2 digits
+    let i = 0;
+    while (i < 2) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    return pos;
+}
+
+// Match IP pattern: [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}
+fn match_ip(text, start) {
+    let pos = start;
+
+    let octet = 0;
+    while (octet < 4) {
+        // Match 1-3 digits
+        let digit_count = 0;
+        while (digit_count < 3 && pos < text.length && is_digit(text[pos])) {
+            digit_count = digit_count + 1;
+            pos = pos + 1;
+        }
+        if (digit_count == 0) { return -1; }
+
+        // Match dot (except after last octet)
+        if (octet < 3) {
+            if (pos >= text.length || text[pos] != '.') { return -1; }
+            pos = pos + 1;
+        }
+
+        octet = octet + 1;
+    }
+
+    return pos;
+}
+
+// Match code pattern: [A-Z]{3}-[0-9]{3}-[A-Z]{3}
+fn match_code(text, start) {
+    let pos = start;
+
+    // Match 3 uppercase letters
+    let i = 0;
+    while (i < 3) {
+        if (pos >= text.length || !is_upper(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    // Match dash
+    if (pos >= text.length || text[pos] != '-') { return -1; }
+    pos = pos + 1;
+
+    // Match 3 digits
+    i = 0;
+    while (i < 3) {
+        if (pos >= text.length || !is_digit(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    // Match dash
+    if (pos >= text.length || text[pos] != '-') { return -1; }
+    pos = pos + 1;
+
+    // Match 3 uppercase letters
+    i = 0;
+    while (i < 3) {
+        if (pos >= text.length || !is_upper(text[pos])) { return -1; }
+        pos = pos + 1;
+        i = i + 1;
+    }
+
+    return pos;
+}
+
+// Match 4+ letter word at word boundary
+fn match_word4plus(text, start) {
+    // Check word boundary (start of text or prev char is not alpha)
+    if (start > 0 && is_alpha(text[start - 1])) {
+        return -1;
+    }
+
+    let pos = start;
+    let len = 0;
+
+    // Match lowercase letters
+    while (pos < text.length && is_lower(text[pos])) {
+        len = len + 1;
+        pos = pos + 1;
+    }
+
+    // Check we have at least 4 letters
+    if (len < 4) { return -1; }
+
+    // Check word boundary (end of text or next char is not alpha)
+    if (pos < text.length && is_alpha(text[pos])) {
+        return -1;
+    }
+
+    return pos;
+}
+
+// Count matches of a pattern in text
+fn count_matches(text, matcher) {
+    let count = 0;
+    let pos = 0;
+
+    while (pos < text.length) {
+        let end = matcher(text, pos);
+        if (end > pos) {
+            count = count + 1;
+            pos = end;
+        } else {
+            pos = pos + 1;
+        }
+    }
+
+    return count;
+}
+
+// Main
+let iterations = 10000;
+if (args.length > 1) {
+    iterations = parse_int(args[1]);
+}
+
+// Generate test text
+let base = "The quick brown fox jumps over the lazy dog. Email: user123@example.com Phone: 555-1234 Date: 2024-01-15 Price: $99.99 URL: https://www.example.com/path?query=value IP: 192.168.1.1 Code: ABC-123-XYZ\n";
+
+let text = "";
+let i = 0;
+while (i < iterations) {
+    text = text + base;
+    i = i + 1;
+}
+
+// Count all pattern matches
+let total = 0;
+total = total + count_matches(text, match_email);
+total = total + count_matches(text, match_phone);
+total = total + count_matches(text, match_date);
+total = total + count_matches(text, match_price);
+total = total + count_matches(text, match_ip);
+total = total + count_matches(text, match_code);
+total = total + count_matches(text, match_word4plus);
+
+print(total);
