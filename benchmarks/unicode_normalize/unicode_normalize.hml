@@ -1,0 +1,166 @@
+// Unicode normalization benchmark for Hemlock
+// Implements simplified NFC/NFD normalization for common Latin characters
+
+fn parse_int(s) {
+    let result = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        result = result * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return result;
+}
+
+// Composition mappings: [base, combining, composed]
+let compositions = [
+    [0x0065, 0x0301, 0x00E9],  // e + acute -> é
+    [0x0045, 0x0301, 0x00C9],  // E + acute -> É
+    [0x0061, 0x0301, 0x00E1],  // a + acute -> á
+    [0x0041, 0x0301, 0x00C1],  // A + acute -> Á
+    [0x006F, 0x0301, 0x00F3],  // o + acute -> ó
+    [0x004F, 0x0301, 0x00D3],  // O + acute -> Ó
+    [0x0075, 0x0301, 0x00FA],  // u + acute -> ú
+    [0x0055, 0x0301, 0x00DA],  // U + acute -> Ú
+    [0x0069, 0x0301, 0x00ED],  // i + acute -> í
+    [0x0049, 0x0301, 0x00CD],  // I + acute -> Í
+    [0x006E, 0x0303, 0x00F1],  // n + tilde -> ñ
+    [0x004E, 0x0303, 0x00D1],  // N + tilde -> Ñ
+    [0x0061, 0x030A, 0x00E5],  // a + ring -> å
+    [0x0041, 0x030A, 0x00C5],  // A + ring -> Å
+    [0x0063, 0x0327, 0x00E7],  // c + cedilla -> ç
+    [0x0043, 0x0327, 0x00C7],  // C + cedilla -> Ç
+    [0x0065, 0x0300, 0x00E8],  // e + grave -> è
+    [0x0045, 0x0300, 0x00C8],  // E + grave -> È
+    [0x0061, 0x0300, 0x00E0],  // a + grave -> à
+    [0x0041, 0x0300, 0x00C0],  // A + grave -> À
+    [0x006F, 0x0302, 0x00F4],  // o + circumflex -> ô
+    [0x004F, 0x0302, 0x00D4],  // O + circumflex -> Ô
+    [0x0075, 0x0308, 0x00FC],  // u + diaeresis -> ü
+    [0x0055, 0x0308, 0x00DC]   // U + diaeresis -> Ü
+];
+
+// Find composition for base + combining
+fn find_composition(base, combining) {
+    let i = 0;
+    while (i < compositions.length) {
+        let mapping = compositions[i];
+        if (mapping[0] == base && mapping[1] == combining) {
+            return mapping[2];
+        }
+        i = i + 1;
+    }
+    return 0;
+}
+
+// Find decomposition for precomposed character
+fn find_decomposition(composed) {
+    let i = 0;
+    while (i < compositions.length) {
+        let mapping = compositions[i];
+        if (mapping[2] == composed) {
+            return [mapping[0], mapping[1]];
+        }
+        i = i + 1;
+    }
+    return nil;
+}
+
+// Get codepoint from string at position
+fn get_codepoint(s, idx) {
+    let ch = s[idx];
+    let code: i32 = ch;
+    return code;
+}
+
+// Check if codepoint is a combining character (simplified range check)
+fn is_combining(cp) {
+    // Combining Diacritical Marks: U+0300 - U+036F
+    return cp >= 0x0300 && cp <= 0x036F;
+}
+
+// Simple NFC normalization (compose combining sequences)
+fn normalize_nfc(input) {
+    let result = [];
+    let i = 0;
+    let len = input.length;
+
+    while (i < len) {
+        let cp1 = get_codepoint(input, i);
+
+        // Check if next char is a combining character
+        if (i + 1 < len) {
+            let cp2 = get_codepoint(input, i + 1);
+            if (is_combining(cp2)) {
+                let composed = find_composition(cp1, cp2);
+                if (composed > 0) {
+                    result.push(composed);
+                    i = i + 2;
+                } else {
+                    result.push(cp1);
+                    i = i + 1;
+                }
+            } else {
+                result.push(cp1);
+                i = i + 1;
+            }
+        } else {
+            result.push(cp1);
+            i = i + 1;
+        }
+    }
+
+    return result;
+}
+
+// Simple NFD normalization (decompose precomposed characters)
+fn normalize_nfd(input) {
+    let result = [];
+    let i = 0;
+    let len = input.length;
+
+    while (i < len) {
+        let cp = get_codepoint(input, i);
+        let decomp = find_decomposition(cp);
+
+        if (decomp != nil) {
+            result.push(decomp[0]);
+            result.push(decomp[1]);
+        } else {
+            result.push(cp);
+        }
+
+        i = i + 1;
+    }
+
+    return result;
+}
+
+// Main benchmark
+let iterations = 100000;
+if (args.length > 1) {
+    iterations = parse_int(args[1]);
+}
+
+// Test strings with mixed NFD and NFC characters
+// Using escape sequences for Unicode characters
+let test_nfd = "cafe" + "\u{0301}" + " naive resume" + "\u{0301}" + " cooperate senor";
+let test_nfc = "caf" + "\u{00E9}" + " naive r" + "\u{00E9}" + "sum" + "\u{00E9}" + " cooperate se" + "\u{00F1}" + "or";
+
+let total_len = 0;
+let i = 0;
+
+while (i < iterations) {
+    // NFC: compose combining sequences
+    let normalized1 = normalize_nfc(test_nfd);
+
+    // NFD: decompose precomposed characters
+    let normalized2 = normalize_nfd(test_nfc);
+
+    total_len = total_len + normalized1.length + normalized2.length;
+    i = i + 1;
+}
+
+print(total_len);
