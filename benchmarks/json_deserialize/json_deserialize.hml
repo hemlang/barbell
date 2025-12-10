@@ -1,4 +1,5 @@
 // JSON deserialization benchmark - Hemlock
+// Uses built-in .deserialize() method
 
 fn parse_int(s) {
     let result = 0;
@@ -92,195 +93,6 @@ fn float_to_string(n, decimals) {
     return result + frac_str;
 }
 
-// Simple JSON parser for our specific format
-fn skip_whitespace(json, pos) {
-    while (pos < json.length) {
-        let ch = json[pos];
-        if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r') {
-            break;
-        }
-        pos = pos + 1;
-    }
-    return pos;
-}
-
-fn parse_json_string(json, pos) {
-    // Skip opening quote
-    pos = pos + 1;
-    let result = "";
-    while (pos < json.length) {
-        let ch = json[pos];
-        if (ch == '"') {
-            pos = pos + 1;
-            break;
-        }
-        result = result + ch;
-        pos = pos + 1;
-    }
-    return [result, pos];
-}
-
-fn parse_json_number(json, pos) {
-    let start = pos;
-    let is_negative = false;
-    let has_decimal = false;
-
-    if (pos < json.length && json[pos] == '-') {
-        is_negative = true;
-        pos = pos + 1;
-    }
-
-    let int_part = 0;
-    while (pos < json.length) {
-        let ch = json[pos];
-        let code: i32 = ch;
-        let zero: i32 = '0';
-        let nine: i32 = '9';
-        if (code < zero || code > nine) {
-            break;
-        }
-        int_part = int_part * 10 + (code - zero);
-        pos = pos + 1;
-    }
-
-    let frac_part = 0.0;
-    if (pos < json.length && json[pos] == '.') {
-        has_decimal = true;
-        pos = pos + 1;
-        let divisor = 10.0;
-        while (pos < json.length) {
-            let ch = json[pos];
-            let code: i32 = ch;
-            let zero: i32 = '0';
-            let nine: i32 = '9';
-            if (code < zero || code > nine) {
-                break;
-            }
-            frac_part = frac_part + (code - zero) / divisor;
-            divisor = divisor * 10.0;
-            pos = pos + 1;
-        }
-    }
-
-    let result = int_part + frac_part;
-    if (is_negative) {
-        result = -result;
-    }
-    return [result, pos];
-}
-
-fn parse_json_array(json, pos) {
-    // Skip opening bracket
-    pos = pos + 1;
-    let result = [];
-
-    while (pos < json.length) {
-        pos = skip_whitespace(json, pos);
-        if (json[pos] == ']') {
-            pos = pos + 1;
-            break;
-        }
-        if (json[pos] == ',') {
-            pos = pos + 1;
-            continue;
-        }
-
-        let parsed = parse_json_number(json, pos);
-        result.push(parsed[0]);
-        pos = parsed[1];
-    }
-
-    return [result, pos];
-}
-
-fn parse_json_bool(json, pos) {
-    if (pos + 4 <= json.length) {
-        let substr = "";
-        let i = 0;
-        while (i < 4) {
-            substr = substr + json[pos + i];
-            i = i + 1;
-        }
-        if (substr == "true") {
-            return [true, pos + 4];
-        }
-    }
-    if (pos + 5 <= json.length) {
-        let substr = "";
-        let i = 0;
-        while (i < 5) {
-            substr = substr + json[pos + i];
-            i = i + 1;
-        }
-        if (substr == "false") {
-            return [false, pos + 5];
-        }
-    }
-    return [false, pos];
-}
-
-fn parse_record(json) {
-    let id = 0;
-    let name = "";
-    let value = 0.0;
-    let active = false;
-    let tags = [];
-
-    let pos = skip_whitespace(json, 0);
-    if (json[pos] != '{') {
-        return [id, name, value, active, tags];
-    }
-    pos = pos + 1;
-
-    while (pos < json.length && json[pos] != '}') {
-        pos = skip_whitespace(json, pos);
-        if (json[pos] == ',') {
-            pos = pos + 1;
-            continue;
-        }
-        if (json[pos] != '"') {
-            break;
-        }
-
-        // Parse key
-        let key_result = parse_json_string(json, pos);
-        let key = key_result[0];
-        pos = key_result[1];
-
-        pos = skip_whitespace(json, pos);
-        if (json[pos] != ':') {
-            break;
-        }
-        pos = pos + 1;
-        pos = skip_whitespace(json, pos);
-
-        // Parse value based on key
-        if (key == "id") {
-            let parsed = parse_json_number(json, pos);
-            id = parsed[0];
-            pos = parsed[1];
-        } else if (key == "name") {
-            let parsed = parse_json_string(json, pos);
-            name = parsed[0];
-            pos = parsed[1];
-        } else if (key == "value") {
-            let parsed = parse_json_number(json, pos);
-            value = parsed[0];
-            pos = parsed[1];
-        } else if (key == "active") {
-            let parsed = parse_json_bool(json, pos);
-            active = parsed[0];
-            pos = parsed[1];
-        } else if (key == "tags") {
-            let parsed = parse_json_array(json, pos);
-            tags = parsed[0];
-            pos = parsed[1];
-        }
-    }
-
-    return [id, name, value, active, tags];
-}
-
 let n = 100000;
 if (args.length > 1) {
     n = parse_int(args[1]);
@@ -290,9 +102,12 @@ let total_id = 0;
 let i = 0;
 
 while (i < n) {
+    // Build JSON string (still needed as input for deserialization)
     let json_str = "{\"id\":" + int_to_string(i) + ",\"name\":\"benchmark_test\",\"value\":" + float_to_string(3.14159 + (i % 100) * 0.001, 6) + ",\"active\":true,\"tags\":[1,2,3,4,5]}";
-    let record = parse_record(json_str);
-    total_id = total_id + record[0];
+
+    // Use built-in deserialize method
+    let record = json_str.deserialize();
+    total_id = total_id + record.id;
     i = i + 1;
 }
 
