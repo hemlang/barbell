@@ -28,6 +28,8 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **array_sum** - Sum large array (memory, iteration)
 - **string_concat** - String concatenation (allocation, GC pressure)
 - **primes_sieve** - Sieve of Eratosthenes (array access, loops)
+- **json_serialize** - JSON serialization (object creation, string building)
+- **json_deserialize** - JSON parsing (string parsing, object creation)
 
 ## Notes
 
