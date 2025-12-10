@@ -30,6 +30,7 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **primes_sieve** - Sieve of Eratosthenes (array access, loops)
 - **json_serialize** - JSON serialization (object creation, string building)
 - **json_deserialize** - JSON parsing (string parsing, object creation)
+- **word_count** - Count words/lines in large text (classic MapReduce task)
 
 ## Notes
 

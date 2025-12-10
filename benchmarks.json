@@ -19,6 +19,21 @@
       "description": "Sieve of Eratosthenes",
       "default_input": 1000000,
       "quick_input": 100000
+    },
+    "json_serialize": {
+      "description": "JSON serialization",
+      "default_input": 100000,
+      "quick_input": 10000
+    },
+    "json_deserialize": {
+      "description": "JSON parsing",
+      "default_input": 100000,
+      "quick_input": 10000
+    },
+    "word_count": {
+      "description": "Count words/lines in large text",
+      "default_input": 100000,
+      "quick_input": 10000
     }
   },
   "languages": {

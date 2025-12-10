@@ -1,0 +1,64 @@
+// Word count benchmark - Hemlock
+// Count words and lines in large generated text (classic MapReduce task)
+
+fn parse_int(s) {
+    let val = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        val = val * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return val;
+}
+
+fn is_whitespace(ch) {
+    let code: i32 = ch;
+    // space=32, tab=9, newline=10, carriage return=13
+    return code == 32 || code == 9 || code == 10 || code == 13;
+}
+
+let n = 100000;
+if (args.length > 1) {
+    n = parse_int(args[1]);
+}
+
+let phrase = "the quick brown fox jumps over the lazy dog\n";
+
+// Generate text: repeat phrase n times
+let text = "";
+let i = 0;
+while (i < n) {
+    text = text + phrase;
+    i = i + 1;
+}
+
+// Count words and lines
+let words = 0;
+let lines = 0;
+let in_word = false;
+let newline: i32 = '\n';
+
+let j = 0;
+while (j < text.length) {
+    let ch = text[j];
+    let code: i32 = ch;
+
+    if (code == newline) {
+        lines = lines + 1;
+    }
+
+    if (is_whitespace(ch)) {
+        in_word = false;
+    } else {
+        if (!in_word) {
+            words = words + 1;
+            in_word = true;
+        }
+    }
+    j = j + 1;
+}
+
+print(words + " " + lines);
