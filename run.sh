@@ -28,7 +28,7 @@ usage() {
     echo "  --iter N        Number of iterations (default: 3)"
     echo "  --help, -h      Show this help"
     echo ""
-    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, http_throughput"
+    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, json_parse, http_throughput"
     echo "            (leave empty to run all)"
 }
 
@@ -71,6 +71,9 @@ get_input() {
             ;;
         primes_sieve)
             [[ $QUICK_MODE -eq 1 ]] && echo 100000 || echo 1000000
+            ;;
+        json_parse)
+            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
             ;;
         http_throughput)
             # Number of requests (keep low due to connection overhead)
@@ -319,7 +322,7 @@ run_all() {
     if [[ -n "$BENCHMARK" ]]; then
         benchmarks="$BENCHMARK"
     else
-        benchmarks="fib array_sum string_concat primes_sieve http_throughput"
+        benchmarks="fib array_sum string_concat primes_sieve json_parse http_throughput"
     fi
 
     local languages="c hemlockc hemlock python javascript ruby"
