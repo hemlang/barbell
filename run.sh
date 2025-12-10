@@ -28,7 +28,7 @@ usage() {
     echo "  --iter N        Number of iterations (default: 3)"
     echo "  --help, -h      Show this help"
     echo ""
-    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, json_serialize, json_deserialize"
+    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, quicksort, binary_tree, graph_bfs, json_serialize, json_deserialize"
     echo "            (leave empty to run all)"
 }
 
@@ -71,6 +71,15 @@ get_input() {
             ;;
         primes_sieve)
             [[ $QUICK_MODE -eq 1 ]] && echo 100000 || echo 1000000
+            ;;
+        quicksort)
+            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            ;;
+        binary_tree)
+            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            ;;
+        graph_bfs)
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
         json_serialize)
             [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
@@ -201,7 +210,7 @@ run_all() {
     if [[ -n "$BENCHMARK" ]]; then
         benchmarks="$BENCHMARK"
     else
-        benchmarks="fib array_sum string_concat primes_sieve json_serialize json_deserialize"
+        benchmarks="fib array_sum string_concat primes_sieve quicksort binary_tree graph_bfs json_serialize json_deserialize"
     fi
 
     local languages="c hemlockc hemlock python javascript ruby"
