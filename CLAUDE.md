@@ -31,6 +31,8 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **quicksort** - Quicksort algorithm (recursion, array manipulation)
 - **binary_tree** - Binary search tree insert and traversal (object/struct allocation, recursion)
 - **graph_bfs** - Breadth-first search on graph (queue operations, adjacency list traversal)
+- **json_serialize** - JSON serialization (object creation, string building)
+- **json_deserialize** - JSON parsing (string parsing, object creation)
 
 ## Notes
 
