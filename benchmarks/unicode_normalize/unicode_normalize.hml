@@ -68,13 +68,6 @@ fn find_decomposition(composed) {
     return nil;
 }
 
-// Get codepoint from string at position
-fn get_codepoint(s, idx) {
-    let ch = s[idx];
-    let code: i32 = ch;
-    return code;
-}
-
 // Check if codepoint is a combining character (simplified range check)
 fn is_combining(cp) {
     // Combining Diacritical Marks: U+0300 - U+036F
@@ -82,17 +75,18 @@ fn is_combining(cp) {
 }
 
 // Simple NFC normalization (compose combining sequences)
-fn normalize_nfc(input) {
+// Works on codepoint arrays
+fn normalize_nfc(codepoints) {
     let result = [];
     let i = 0;
-    let len = input.length;
+    let len = codepoints.length;
 
     while (i < len) {
-        let cp1 = get_codepoint(input, i);
+        let cp1 = codepoints[i];
 
         // Check if next char is a combining character
         if (i + 1 < len) {
-            let cp2 = get_codepoint(input, i + 1);
+            let cp2 = codepoints[i + 1];
             if (is_combining(cp2)) {
                 let composed = find_composition(cp1, cp2);
                 if (composed > 0) {
@@ -116,13 +110,14 @@ fn normalize_nfc(input) {
 }
 
 // Simple NFD normalization (decompose precomposed characters)
-fn normalize_nfd(input) {
+// Works on codepoint arrays
+fn normalize_nfd(codepoints) {
     let result = [];
     let i = 0;
-    let len = input.length;
+    let len = codepoints.length;
 
     while (i < len) {
-        let cp = get_codepoint(input, i);
+        let cp = codepoints[i];
         let decomp = find_decomposition(cp);
 
         if (decomp != nil) {
@@ -144,20 +139,34 @@ if (args.length > 1) {
     iterations = parse_int(args[1]);
 }
 
-// Test strings with mixed NFD and NFC characters
-// Using escape sequences for Unicode characters
-let test_nfd = "cafe" + "\u{0301}" + " naive resume" + "\u{0301}" + " cooperate senor";
-let test_nfc = "caf" + "\u{00E9}" + " naive r" + "\u{00E9}" + "sum" + "\u{00E9}" + " cooperate se" + "\u{00F1}" + "or";
+// Test data as codepoint arrays (avoids \u{} escape sequences for hemlockc compatibility)
+// NFD-style input: base chars + combining chars as codepoints
+let test_nfd_codepoints = [
+    0x0063, 0x0061, 0x0066, 0x0065, 0x0301,  // café (e + combining acute)
+    0x0020,  // space
+    0x006E, 0x0061, 0x0069, 0x0076, 0x0065,  // naive
+    0x0020,  // space
+    0x0072, 0x0065, 0x0301, 0x0073, 0x0075, 0x006D, 0x0065, 0x0301  // résumé
+];
+
+// NFC-style input: precomposed characters as codepoints
+let test_nfc_codepoints = [
+    0x0063, 0x0061, 0x0066, 0x00E9,  // café (precomposed é)
+    0x0020,  // space
+    0x006E, 0x0061, 0x0069, 0x0076, 0x0065,  // naive
+    0x0020,  // space
+    0x0072, 0x00E9, 0x0073, 0x0075, 0x006D, 0x00E9  // résumé (precomposed)
+];
 
 let total_len = 0;
 let i = 0;
 
 while (i < iterations) {
-    // NFC: compose combining sequences
-    let normalized1 = normalize_nfc(test_nfd);
+    // NFC: compose combining sequences (from NFD-style codepoints)
+    let normalized1 = normalize_nfc(test_nfd_codepoints);
 
-    // NFD: decompose precomposed characters
-    let normalized2 = normalize_nfd(test_nfc);
+    // NFD: decompose precomposed characters (from NFC-style codepoints)
+    let normalized2 = normalize_nfd(test_nfc_codepoints);
 
     total_len = total_len + normalized1.length + normalized2.length;
     i = i + 1;
