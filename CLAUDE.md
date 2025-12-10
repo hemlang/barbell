@@ -28,6 +28,9 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **array_sum** - Sum large array (memory, iteration)
 - **string_concat** - String concatenation (allocation, GC pressure)
 - **primes_sieve** - Sieve of Eratosthenes (array access, loops)
+- **quicksort** - Quicksort algorithm (recursion, array manipulation)
+- **binary_tree** - Binary search tree insert and traversal (object/struct allocation, recursion)
+- **graph_bfs** - Breadth-first search on graph (queue operations, adjacency list traversal)
 - **json_serialize** - JSON serialization (object creation, string building)
 - **json_deserialize** - JSON parsing (string parsing, object creation)
 

@@ -1,0 +1,86 @@
+// Graph BFS benchmark - Hemlock
+
+fn parse_int(s) {
+    let result = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        result = result * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return result;
+}
+
+fn bfs(adj, n, start) {
+    let visited = [];
+    let i = 0;
+    while (i < n) {
+        visited.push(false);
+        i = i + 1;
+    }
+
+    let queue = [start];
+    let head = 0;
+    visited[start] = true;
+    let count = 0;
+
+    while (head < queue.length) {
+        let node = queue[head];
+        head = head + 1;
+        count = count + 1;
+
+        let neighbors = adj[node];
+        let j = 0;
+        while (j < neighbors.length) {
+            let neighbor = neighbors[j];
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                queue.push(neighbor);
+            }
+            j = j + 1;
+        }
+    }
+
+    return count;
+}
+
+let n = 10000;
+if (args.length > 1) {
+    n = parse_int(args[1]);
+}
+
+// Build adjacency list
+let adj = [];
+let i = 0;
+while (i < n) {
+    adj.push([]);
+    i = i + 1;
+}
+
+// Build a connected graph: each node connects to a few others
+// Using LCG for deterministic pseudo-random edges
+let seed = 12345;
+i = 0;
+while (i < n) {
+    // Connect to next node (ensures connectivity)
+    if (i + 1 < n) {
+        adj[i].push(i + 1);
+        adj[i + 1].push(i);
+    }
+    // Add some random edges
+    let j = 0;
+    while (j < 3) {
+        seed = (seed * 1103515245 + 12345) % 4294967296;
+        let target = ((seed / 65536) % 32768) % n;
+        if (target != i) {
+            adj[i].push(target);
+        }
+        j = j + 1;
+    }
+    i = i + 1;
+}
+
+// Run BFS from node 0
+print(bfs(adj, n, 0));
