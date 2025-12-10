@@ -33,6 +33,7 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **graph_bfs** - Breadth-first search on graph (queue operations, adjacency list traversal)
 - **json_serialize** - JSON serialization (object creation, string building)
 - **json_deserialize** - JSON parsing (string parsing, object creation)
+- **hash_sha256** - SHA-256 hashing (bitwise operations, loops, array manipulation)
 
 ## Notes
 

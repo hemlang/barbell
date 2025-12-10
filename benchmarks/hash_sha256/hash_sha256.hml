@@ -1,0 +1,234 @@
+// SHA-256 benchmark - Hemlock
+// Pure implementation for fair language comparison
+
+fn parse_int(s) {
+    let result = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let ch = s[idx];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        result = result * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return result;
+}
+
+// 32-bit mask
+let MASK: i64 = 4294967295;
+
+// Right rotate for 32-bit values
+fn rotr(x, n) {
+    return ((x >> n) | (x << (32 - n))) & MASK;
+}
+
+// SHA-256 constants
+let K = [
+    1116352408, 1899447441, 3049323471, 3921009573,
+    961987163, 1508970993, 2453635748, 2870763221,
+    3624381080, 310598401, 607225278, 1426881987,
+    1925078388, 2162078206, 2614888103, 3248222580,
+    3835390401, 4022224774, 264347078, 604807628,
+    770255983, 1249150122, 1555081692, 1996064986,
+    2554220882, 2821834349, 2952996808, 3210313671,
+    3336571891, 3584528711, 113926993, 338241895,
+    666307205, 773529912, 1294757372, 1396182291,
+    1695183700, 1986661051, 2177026350, 2456956037,
+    2730485921, 2820302411, 3259730800, 3345764771,
+    3516065817, 3600352804, 4094571909, 275423344,
+    430227734, 506948616, 659060556, 883997877,
+    958139571, 1322822218, 1537002063, 1747873779,
+    1955562222, 2024104815, 2227730452, 2361852424,
+    2428436474, 2756734187, 3204031479, 3329325298
+];
+
+// SHA-256 functions
+fn ch(x, y, z) {
+    return (x & y) ^ ((~x) & z);
+}
+
+fn maj(x, y, z) {
+    return (x & y) ^ (x & z) ^ (y & z);
+}
+
+fn ep0(x) {
+    return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
+}
+
+fn ep1(x) {
+    return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
+}
+
+fn sig0(x) {
+    return rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3);
+}
+
+fn sig1(x) {
+    return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
+}
+
+fn sha256_transform(state, block) {
+    let W = [];
+    let i = 0;
+    while (i < 64) {
+        W.push(0);
+        i = i + 1;
+    }
+
+    // Prepare message schedule
+    i = 0;
+    while (i < 16) {
+        W[i] = ((block[i * 4] << 24) | (block[i * 4 + 1] << 16) | (block[i * 4 + 2] << 8) | block[i * 4 + 3]) & MASK;
+        i = i + 1;
+    }
+
+    while (i < 64) {
+        W[i] = (sig1(W[i - 2]) + W[i - 7] + sig0(W[i - 15]) + W[i - 16]) & MASK;
+        i = i + 1;
+    }
+
+    let a = state[0];
+    let b = state[1];
+    let c = state[2];
+    let d = state[3];
+    let e = state[4];
+    let f = state[5];
+    let g = state[6];
+    let h = state[7];
+
+    i = 0;
+    while (i < 64) {
+        let t1 = (h + ep1(e) + ch(e, f, g) + K[i] + W[i]) & MASK;
+        let t2 = (ep0(a) + maj(a, b, c)) & MASK;
+        h = g;
+        g = f;
+        f = e;
+        e = (d + t1) & MASK;
+        d = c;
+        c = b;
+        b = a;
+        a = (t1 + t2) & MASK;
+        i = i + 1;
+    }
+
+    state[0] = (state[0] + a) & MASK;
+    state[1] = (state[1] + b) & MASK;
+    state[2] = (state[2] + c) & MASK;
+    state[3] = (state[3] + d) & MASK;
+    state[4] = (state[4] + e) & MASK;
+    state[5] = (state[5] + f) & MASK;
+    state[6] = (state[6] + g) & MASK;
+    state[7] = (state[7] + h) & MASK;
+}
+
+fn sha256(data, length) {
+    let state = [
+        1779033703, 3144134277, 1013904242, 2773480762,
+        1359893119, 2600822924, 528734635, 1541459225
+    ];
+
+    let bits = length * 8;
+
+    // Process full blocks
+    let i = 0;
+    while (i + 64 <= length) {
+        let block = [];
+        let j = 0;
+        while (j < 64) {
+            block.push(data[i + j]);
+            j = j + 1;
+        }
+        sha256_transform(state, block);
+        i = i + 64;
+    }
+
+    // Padding
+    let remaining = length - i;
+    let block = [];
+    let j = 0;
+    while (j < remaining) {
+        block.push(data[i + j]);
+        j = j + 1;
+    }
+    block.push(128);  // 0x80
+    while (block.length < 56) {
+        block.push(0);
+    }
+
+    if (remaining >= 56) {
+        while (block.length < 64) {
+            block.push(0);
+        }
+        sha256_transform(state, block);
+        block = [];
+        while (block.length < 56) {
+            block.push(0);
+        }
+    }
+
+    // Append length in bits (big endian, 64-bit)
+    block.push(0);
+    block.push(0);
+    block.push(0);
+    block.push(0);
+    block.push((bits >> 24) & 255);
+    block.push((bits >> 16) & 255);
+    block.push((bits >> 8) & 255);
+    block.push(bits & 255);
+    sha256_transform(state, block);
+
+    // Output hash as bytes
+    let result = [];
+    i = 0;
+    while (i < 8) {
+        result.push((state[i] >> 24) & 255);
+        result.push((state[i] >> 16) & 255);
+        result.push((state[i] >> 8) & 255);
+        result.push(state[i] & 255);
+        i = i + 1;
+    }
+    return result;
+}
+
+// Main benchmark
+let iterations = 100000;
+if (args.length > 1) {
+    iterations = parse_int(args[1]);
+}
+
+// Initialize data with test message
+let message = "benchmark test message for sha256 hashing!!!!!!!";
+let data = [];
+let i = 0;
+while (i < message.length) {
+    let ch = message[i];
+    let code: i32 = ch;
+    data.push(code);
+    i = i + 1;
+}
+while (data.length < 64) {
+    data.push(0);
+}
+
+// Run benchmark iterations
+let hash_result = [];
+i = 0;
+while (i < iterations) {
+    hash_result = sha256(data, 48);
+    // Mix hash back into data
+    let j = 0;
+    while (j < 32) {
+        data[j] = hash_result[j];
+        j = j + 1;
+    }
+    i = i + 1;
+}
+
+// Print checksum
+let checksum = 0;
+i = 0;
+while (i < 32) {
+    checksum = checksum + hash_result[i];
+    i = i + 1;
+}
+print(checksum);
