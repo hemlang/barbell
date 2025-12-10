@@ -33,6 +33,7 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **graph_bfs** - Breadth-first search on graph (queue operations, adjacency list traversal)
 - **json_serialize** - JSON serialization (object creation, string building)
 - **json_deserialize** - JSON parsing (string parsing, object creation)
+- **word_count** - Count words/lines in large text (classic MapReduce task)
 
 ## Notes
 
