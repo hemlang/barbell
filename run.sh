@@ -28,7 +28,7 @@ usage() {
     echo "  --iter N        Number of iterations (default: 3)"
     echo "  --help, -h      Show this help"
     echo ""
-    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve"
+    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, file_io"
     echo "            (leave empty to run all)"
 }
 
@@ -70,6 +70,9 @@ get_input() {
             [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
             ;;
         primes_sieve)
+            [[ $QUICK_MODE -eq 1 ]] && echo 100000 || echo 1000000
+            ;;
+        file_io)
             [[ $QUICK_MODE -eq 1 ]] && echo 100000 || echo 1000000
             ;;
     esac
@@ -195,7 +198,7 @@ run_all() {
     if [[ -n "$BENCHMARK" ]]; then
         benchmarks="$BENCHMARK"
     else
-        benchmarks="fib array_sum string_concat primes_sieve"
+        benchmarks="fib array_sum string_concat primes_sieve file_io"
     fi
 
     local languages="c hemlockc hemlock python javascript ruby"
