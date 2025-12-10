@@ -1,0 +1,35 @@
+// JSON parse/serialize benchmark - Hemlock implementation
+
+let TEST_JSON = "{\"name\":\"John Doe\",\"age\":30,\"active\":true,\"balance\":1234.56,\"address\":{\"street\":\"123 Main St\",\"city\":\"Springfield\",\"zip\":\"12345\"},\"tags\":[\"developer\",\"golang\",\"python\",\"rust\"],\"scores\":[95,87,92,88,91],\"metadata\":null}";
+
+fn parse_int(s) {
+    let result = 0;
+    let i = 0;
+    while (i < s.length) {
+        let ch = s[i];
+        let code: i32 = ch;
+        let digit = code - 48;
+        result = result * 10 + digit;
+        i = i + 1;
+    }
+    return result;
+}
+
+fn main() {
+    let n = parse_int(args[1]);
+    let total_len = 0;
+
+    let i = 0;
+    while (i < n) {
+        // Parse JSON string to object
+        let data = json_parse(TEST_JSON);
+        // Serialize back to string
+        let output = json_stringify(data);
+        total_len = total_len + output.length;
+        i = i + 1;
+    }
+
+    print(total_len);
+}
+
+main();

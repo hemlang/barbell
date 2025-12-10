@@ -19,6 +19,18 @@
       "description": "Sieve of Eratosthenes",
       "default_input": 1000000,
       "quick_input": 100000
+    },
+    "json_parse": {
+      "description": "JSON parse and serialize",
+      "default_input": 100000,
+      "quick_input": 10000
+    },
+    "http_throughput": {
+      "description": "HTTP server request throughput",
+      "default_input": 2000,
+      "quick_input": 500,
+      "metric": "requests_per_second",
+      "higher_is_better": true
     }
   },
   "languages": {
@@ -46,6 +58,11 @@
       "extension": ".js",
       "compile": null,
       "run": "node {src} {input}"
+    },
+    "ruby": {
+      "extension": ".rb",
+      "compile": null,
+      "run": "ruby {src} {input}"
     }
   }
 }
