@@ -104,7 +104,7 @@ time_cmd() {
     local start end exit_code
     local error_file=$(mktemp)
     start=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    timeout "$TIMEOUT" bash -c "$@" > /dev/null 2>"$error_file"
+    timeout "$TIMEOUT" bash -c "$*" > /dev/null 2>"$error_file"
     exit_code=$?
     end=$(python3 -c 'import time; print(int(time.time() * 1000))')
     if [[ $exit_code -eq 124 ]]; then
