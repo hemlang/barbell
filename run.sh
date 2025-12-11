@@ -17,6 +17,7 @@ NC='\033[0m'
 QUICK_MODE=0
 BENCHMARK=""
 ITERATIONS=3
+TIMEOUT=60  # seconds per benchmark iteration
 
 usage() {
     echo "Usage: $0 [OPTIONS] [BENCHMARK]"
@@ -24,6 +25,7 @@ usage() {
     echo "Options:"
     echo "  --quick, -q     Use smaller inputs for faster runs"
     echo "  --iter N        Number of iterations (default: 3)"
+    echo "  --timeout N     Timeout per iteration in seconds (default: 60)"
     echo "  --help, -h      Show this help"
     echo ""
     echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, quicksort, binary_tree, graph_bfs, json_serialize, json_deserialize, hash_sha256"
@@ -39,6 +41,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --iter)
             ITERATIONS="$2"
+            shift 2
+            ;;
+        --timeout)
+            TIMEOUT="$2"
             shift 2
             ;;
         --help|-h)
@@ -93,13 +99,19 @@ get_input() {
 
 # Time a command and return milliseconds
 # Returns exit code of command; time is echoed, errors go to stderr
+# Exit code 124 indicates timeout
 time_cmd() {
     local start end exit_code
     local error_file=$(mktemp)
     start=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    eval "$@" > /dev/null 2>"$error_file"
+    timeout "$TIMEOUT" bash -c "$@" > /dev/null 2>"$error_file"
     exit_code=$?
     end=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    if [[ $exit_code -eq 124 ]]; then
+        rm -f "$error_file"
+        echo "TIMEOUT after ${TIMEOUT}s" >&2
+        return 124
+    fi
     if [[ $exit_code -ne 0 ]]; then
         cat "$error_file" >&2
         rm -f "$error_file"
@@ -111,7 +123,7 @@ time_cmd() {
 
 # Run a single benchmark for a language
 # Output: time in ms on success, error message prefixed with "ERROR:" on failure
-# Return: 0 on success, 1 if source not found, 2 on compile error, 3 on runtime error
+# Return: 0 on success, 1 if source not found, 2 on compile error, 3 on runtime error, 4 on timeout
 run_benchmark() {
     local bench=$1
     local lang=$2
@@ -133,7 +145,11 @@ run_benchmark() {
             fi
             for ((i=0; i<ITERATIONS; i++)); do
                 t=$(time_cmd "$bin" "$input" 2>&1)
-                if [[ $? -ne 0 ]]; then
+                local ret=$?
+                if [[ $ret -eq 124 ]]; then
+                    echo "ERROR:timeout:$t"
+                    return 4
+                elif [[ $ret -ne 0 ]]; then
                     echo "ERROR:runtime:$t"
                     return 3
                 fi
@@ -148,7 +164,11 @@ run_benchmark() {
             local hemlock_bin="${HEMLOCK_BIN:-hemlock}"
             for ((i=0; i<ITERATIONS; i++)); do
                 t=$(time_cmd "$hemlock_bin" "$src" "$input" 2>&1)
-                if [[ $? -ne 0 ]]; then
+                local ret=$?
+                if [[ $ret -eq 124 ]]; then
+                    echo "ERROR:timeout:$t"
+                    return 4
+                elif [[ $ret -ne 0 ]]; then
                     echo "ERROR:runtime:$t"
                     return 3
                 fi
@@ -191,7 +211,11 @@ run_benchmark() {
             fi
             for ((i=0; i<ITERATIONS; i++)); do
                 t=$(time_cmd "$bin" "$input" 2>&1)
-                if [[ $? -ne 0 ]]; then
+                local ret=$?
+                if [[ $ret -eq 124 ]]; then
+                    echo "ERROR:timeout:$t"
+                    return 4
+                elif [[ $ret -ne 0 ]]; then
                     echo "ERROR:runtime:$t"
                     return 3
                 fi
@@ -204,7 +228,11 @@ run_benchmark() {
             [[ ! -f "$src" ]] && return 1
             for ((i=0; i<ITERATIONS; i++)); do
                 t=$(time_cmd python3 "$src" "$input" 2>&1)
-                if [[ $? -ne 0 ]]; then
+                local ret=$?
+                if [[ $ret -eq 124 ]]; then
+                    echo "ERROR:timeout:$t"
+                    return 4
+                elif [[ $ret -ne 0 ]]; then
                     echo "ERROR:runtime:$t"
                     return 3
                 fi
@@ -217,7 +245,11 @@ run_benchmark() {
             [[ ! -f "$src" ]] && return 1
             for ((i=0; i<ITERATIONS; i++)); do
                 t=$(time_cmd node "$src" "$input" 2>&1)
-                if [[ $? -ne 0 ]]; then
+                local ret=$?
+                if [[ $ret -eq 124 ]]; then
+                    echo "ERROR:timeout:$t"
+                    return 4
+                elif [[ $ret -ne 0 ]]; then
                     echo "ERROR:runtime:$t"
                     return 3
                 fi
@@ -230,7 +262,11 @@ run_benchmark() {
             [[ ! -f "$src" ]] && return 1
             for ((i=0; i<ITERATIONS; i++)); do
                 t=$(time_cmd ruby "$src" "$input" 2>&1)
-                if [[ $? -ne 0 ]]; then
+                local ret=$?
+                if [[ $ret -eq 124 ]]; then
+                    echo "ERROR:timeout:$t"
+                    return 4
+                elif [[ $ret -ne 0 ]]; then
                     echo "ERROR:runtime:$t"
                     return 3
                 fi
@@ -268,7 +304,7 @@ run_all() {
     echo -e "${BOLD}barbell${NC} - Hemlock Benchmark Suite"
     echo ""
     [[ $QUICK_MODE -eq 1 ]] && echo -e "${YELLOW}Quick mode enabled${NC}"
-    echo -e "Iterations: $ITERATIONS"
+    echo -e "Iterations: $ITERATIONS, Timeout: ${TIMEOUT}s"
     echo ""
 
     for bench in $benchmarks; do
@@ -287,7 +323,7 @@ run_all() {
             # Skip if source file not found (exit code 1)
             [[ $exit_code -eq 1 ]] && continue
 
-            # Handle errors (compile or runtime)
+            # Handle errors (compile, runtime, or timeout)
             if [[ $exit_code -ne 0 ]] || [[ "$result" == ERROR:* ]]; then
                 local error_type error_msg
                 if [[ "$result" == ERROR:compile:* ]]; then
@@ -298,6 +334,8 @@ run_all() {
                     if [[ -n "$first_line" ]]; then
                         printf "  %-12s ${RED}  %s${NC}\n" "" "$first_line"
                     fi
+                elif [[ "$result" == ERROR:timeout:* ]]; then
+                    printf "  %-12s ${YELLOW}%s${NC}\n" "$lang" "TIMEOUT (>${TIMEOUT}s)"
                 elif [[ "$result" == ERROR:runtime:* ]]; then
                     error_msg="${result#ERROR:runtime:}"
                     printf "  %-12s ${RED}%s${NC}\n" "$lang" "RUNTIME ERROR"
