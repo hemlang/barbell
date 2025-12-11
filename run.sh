@@ -144,15 +144,20 @@ run_benchmark() {
             local runtime_dir="${HEMLOCK_RUNTIME:-}"
             if [[ -z "$runtime_dir" ]]; then
                 # Try common locations
-                for dir in "$SCRIPT_DIR/../hemlock" "$HOME/Projects/hemlock"; do
-                    if [[ -f "$dir/libhemlock_runtime.so" ]]; then
+                for dir in "/usr/local/lib/hemlock" "$SCRIPT_DIR/../hemlock" "$HOME/Projects/hemlock"; do
+                    if [[ -f "$dir/libhemlock_runtime.a" ]] || [[ -f "$dir/libhemlock_runtime.so" ]]; then
                         runtime_dir="$dir"
                         break
                     fi
                 done
             fi
             if [[ -n "$runtime_dir" ]]; then
-                export C_INCLUDE_PATH="${runtime_dir}/runtime/include:${C_INCLUDE_PATH:-}"
+                # Handle both installed layout (/usr/local/lib/hemlock/include) and dev layout (runtime/include)
+                if [[ -d "$runtime_dir/include" ]]; then
+                    export C_INCLUDE_PATH="${runtime_dir}/include:${C_INCLUDE_PATH:-}"
+                elif [[ -d "$runtime_dir/runtime/include" ]]; then
+                    export C_INCLUDE_PATH="${runtime_dir}/runtime/include:${C_INCLUDE_PATH:-}"
+                fi
                 export LIBRARY_PATH="${runtime_dir}:${LIBRARY_PATH:-}"
                 export LD_LIBRARY_PATH="${runtime_dir}:${LD_LIBRARY_PATH:-}"
             fi
