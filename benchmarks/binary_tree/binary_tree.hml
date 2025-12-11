@@ -4,8 +4,8 @@ fn parse_int(s) {
     let result = 0;
     let idx = 0;
     while (idx < s.length) {
-        let ch = s[idx];
-        let code: i32 = ch;
+        let c = s[idx];
+        let code: i32 = c;
         let zero: i32 = '0';
         result = result * 10 + (code - zero);
         idx = idx + 1;
@@ -15,11 +15,11 @@ fn parse_int(s) {
 
 // Node represented as array: [value, left, right]
 fn new_node(value) {
-    return [value, nil, nil];
+    return [value, null, null];
 }
 
 fn insert(root, value) {
-    if (root == nil) {
+    if (root == null) {
         return new_node(value);
     }
     if (value < root[0]) {
@@ -31,7 +31,7 @@ fn insert(root, value) {
 }
 
 fn inorder_sum(root) {
-    if (root == nil) {
+    if (root == null) {
         return 0;
     }
     return inorder_sum(root[1]) + root[0] + inorder_sum(root[2]);
@@ -42,17 +42,17 @@ if (args.length > 1) {
     n = parse_int(args[1]);
 }
 
-let root = nil;
+let tree_root = null;
 
 // Insert values using LCG for pseudo-random values
-let seed = 12345;
-let i = 0;
-while (i < n) {
-    seed = (seed * 1103515245 + 12345) % 4294967296;
-    let value = (seed / 65536) % 32768;
-    root = insert(root, value);
-    i = i + 1;
+let rng = 12345;
+let k = 0;
+while (k < n) {
+    rng = (rng * 1103515245 + 12345) % 4294967296;
+    let val = (rng / 65536) % 32768;
+    tree_root = insert(tree_root, val);
+    k = k + 1;
 }
 
 // Sum all values via in-order traversal
-print(inorder_sum(root));
+print(inorder_sum(tree_root));

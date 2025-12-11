@@ -63,14 +63,15 @@ fn int_to_string(n) {
 }
 
 fn float_to_string(n, decimals) {
-    let int_part = n;
-    if (n < 0) {
-        int_part = -int_part;
+    let is_negative = n < 0;
+    let value = n;
+    if (is_negative) {
+        value = -value;
     }
-    let frac = n - int_part;
-    if (frac < 0) {
-        frac = -frac;
-    }
+
+    // Get integer part by truncating
+    let int_part: i64 = value;
+    let frac = value - int_part;
 
     let multiplier = 1;
     let i = 0;
@@ -78,7 +79,7 @@ fn float_to_string(n, decimals) {
         multiplier = multiplier * 10;
         i = i + 1;
     }
-    let frac_int = (frac * multiplier + 0.5);
+    let frac_int: i64 = frac * multiplier + 0.5;
 
     let result = int_to_string(int_part) + ".";
     let frac_str = int_to_string(frac_int);
@@ -87,7 +88,7 @@ fn float_to_string(n, decimals) {
         frac_str = "0" + frac_str;
     }
 
-    if (n < 0) {
+    if (is_negative) {
         return "-" + result + frac_str;
     }
     return result + frac_str;

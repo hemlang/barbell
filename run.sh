@@ -59,34 +59,34 @@ get_input() {
     local bench=$1
     case $bench in
         fib)
-            [[ $QUICK_MODE -eq 1 ]] && echo 30 || echo 35
+            [[ $QUICK_MODE -eq 1 ]] && echo 20 || echo 30
             ;;
         array_sum)
-            [[ $QUICK_MODE -eq 1 ]] && echo 1000000 || echo 10000000
-            ;;
-        string_concat)
-            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
-            ;;
-        primes_sieve)
             [[ $QUICK_MODE -eq 1 ]] && echo 100000 || echo 1000000
             ;;
+        string_concat)
+            [[ $QUICK_MODE -eq 1 ]] && echo 5000 || echo 10000
+            ;;
+        primes_sieve)
+            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            ;;
         quicksort)
-            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
-            ;;
-        binary_tree)
-            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
-            ;;
-        graph_bfs)
             [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
+        binary_tree)
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
+            ;;
+        graph_bfs)
+            [[ $QUICK_MODE -eq 1 ]] && echo 100 || echo 1000
+            ;;
         json_serialize)
-            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
         json_deserialize)
-            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
         hash_sha256)
-            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
     esac
 }
