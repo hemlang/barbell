@@ -49,7 +49,7 @@ let rng = 12345;
 let k = 0;
 while (k < n) {
     rng = (rng * 1103515245 + 12345) % 4294967296;
-    let val = (rng / 65536) % 32768;
+    let val = divi(rng, 65536) % 32768;
     tree_root = insert(tree_root, val);
     k = k + 1;
 }
