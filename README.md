@@ -1,4 +1,4 @@
-# barbell
+# barbell 🏋️
 
 Benchmark suite for comparing language performance across Hemlock, HemlockC, C, Python, and JavaScript.
 
