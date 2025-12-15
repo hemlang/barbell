@@ -29,71 +29,6 @@ fn parse_int(s) {
     return result;
 }
 
-fn int_to_string(n) {
-    if (n == 0) {
-        return "0";
-    }
-    let result = "";
-    let num = n;
-    let is_negative = false;
-    if (num < 0) {
-        is_negative = true;
-        num = -num;
-    }
-    while (num > 0) {
-        let digit = num % 10;
-        let ch = "";
-        if (digit == 0) { ch = "0"; }
-        else if (digit == 1) { ch = "1"; }
-        else if (digit == 2) { ch = "2"; }
-        else if (digit == 3) { ch = "3"; }
-        else if (digit == 4) { ch = "4"; }
-        else if (digit == 5) { ch = "5"; }
-        else if (digit == 6) { ch = "6"; }
-        else if (digit == 7) { ch = "7"; }
-        else if (digit == 8) { ch = "8"; }
-        else if (digit == 9) { ch = "9"; }
-        result = ch + result;
-        num = num / 10;
-    }
-    if (is_negative) {
-        result = "-" + result;
-    }
-    return result;
-}
-
-fn float_to_string(n, decimals) {
-    let is_negative = n < 0;
-    let value = n;
-    if (is_negative) {
-        value = -value;
-    }
-
-    // Get integer part by truncating
-    let int_part: i64 = value;
-    let frac = value - int_part;
-
-    let multiplier = 1;
-    let i = 0;
-    while (i < decimals) {
-        multiplier = multiplier * 10;
-        i = i + 1;
-    }
-    let frac_int: i64 = frac * multiplier + 0.5;
-
-    let result = int_to_string(int_part) + ".";
-    let frac_str = int_to_string(frac_int);
-
-    while (frac_str.length < decimals) {
-        frac_str = "0" + frac_str;
-    }
-
-    if (is_negative) {
-        return "-" + result + frac_str;
-    }
-    return result + frac_str;
-}
-
 let n = 100000;
 if (args.length > 1) {
     n = parse_int(args[1]);
@@ -103,8 +38,8 @@ let total_id = 0;
 let i = 0;
 
 while (i < n) {
-    // Build JSON string (still needed as input for deserialization)
-    let json_str = "{\"id\":" + int_to_string(i) + ",\"name\":\"benchmark_test\",\"value\":" + float_to_string(3.14159 + (i % 100) * 0.001, 6) + ",\"active\":true,\"tags\":[1,2,3,4,5]}";
+    // Build JSON string using built-in concatenation (auto-converts numbers to strings)
+    let json_str = "{\"id\":" + i + ",\"name\":\"benchmark_test\",\"value\":" + (3.14159 + (i % 100) * 0.001) + ",\"active\":true,\"tags\":[1,2,3,4,5]}";
 
     // Use built-in deserialize method
     let record = json_str.deserialize();

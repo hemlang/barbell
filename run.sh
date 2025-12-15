@@ -97,16 +97,21 @@ get_input() {
     esac
 }
 
+# Fast millisecond timestamp (uses perl instead of python for ~10x faster startup)
+now_ms() {
+    perl -MTime::HiRes=time -e 'printf "%d\n", time * 1000'
+}
+
 # Time a command and return milliseconds
 # Returns exit code of command; time is echoed, errors go to stderr
 # Exit code 124 indicates timeout
 time_cmd() {
     local start end exit_code
     local error_file=$(mktemp)
-    start=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    start=$(now_ms)
     timeout "$TIMEOUT" bash -c "$*" > /dev/null 2>"$error_file"
     exit_code=$?
-    end=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    end=$(now_ms)
     if [[ $exit_code -eq 124 ]]; then
         rm -f "$error_file"
         echo "TIMEOUT after ${TIMEOUT}s" >&2
