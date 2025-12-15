@@ -73,7 +73,7 @@ while (i < n) {
     let j = 0;
     while (j < 3) {
         rng = (rng * 1103515245 + 12345) % 4294967296;
-        let target: i32 = ((rng / 65536) % 32768) % n;
+        let target: i32 = (divi(rng, 65536) % 32768) % n;
         if (target != i) {
             adj[i].push(target);
         }
