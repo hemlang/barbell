@@ -146,7 +146,9 @@ run_benchmark() {
             local src="$bench_dir/${bench}.c"
             local bin="$BUILD_DIR/${bench}_c"
             [[ ! -f "$src" ]] && return 1
-            error_output=$(gcc -O3 -o "$bin" "$src" 2>&1)
+            local extra_libs=""
+            [[ "$bench" == "sqlite_bench" ]] && extra_libs="-lsqlite3"
+            error_output=$(gcc -O3 -o "$bin" "$src" $extra_libs 2>&1)
             if [[ $? -ne 0 ]]; then
                 echo "ERROR:compile:$error_output"
                 return 2
