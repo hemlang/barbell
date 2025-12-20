@@ -14,19 +14,7 @@ fn parse_int(s) {
 }
 
 fn int_to_string(n) {
-    if (n == 0) {
-        return "0";
-    }
-    let result = "";
-    let num = n;
-    while (num > 0) {
-        let digit = num % 10;
-        let zero: i32 = '0';
-        let ch = (zero + digit) as rune;
-        result = ch + result;
-        num = num / 10;
-    }
-    return result;
+    return "" + n;
 }
 
 fn build_request(i) {
