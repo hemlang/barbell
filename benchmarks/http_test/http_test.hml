@@ -1,0 +1,65 @@
+// HTTP test benchmark - Hemlock
+
+fn parse_int(s) {
+    let result = 0;
+    let i = 0;
+    while (i < s.length) {
+        let ch = s[i];
+        let code: i32 = ch;
+        let zero: i32 = '0';
+        result = result * 10 + (code - zero);
+        i = i + 1;
+    }
+    return result;
+}
+
+fn int_to_string(n) {
+    return "" + n;
+}
+
+fn build_request(i) {
+    return "GET /api/data/" + int_to_string(i) + " HTTP/1.1\r\n" +
+           "Host: localhost:8080\r\n" +
+           "Accept: application/json\r\n" +
+           "Connection: keep-alive\r\n" +
+           "\r\n";
+}
+
+fn build_response(i) {
+    return "HTTP/1.1 200 OK\r\n" +
+           "Content-Type: application/json\r\n" +
+           "Content-Length: 32\r\n" +
+           "\r\n" +
+           "{\"id\":" + int_to_string(i) + ",\"status\":\"ok\"}";
+}
+
+fn find_body(response) {
+    let marker = "\r\n\r\n";
+    let i = 0;
+    while (i < response.length - 3) {
+        if (response[i] == '\r' && response[i+1] == '\n' &&
+            response[i+2] == '\r' && response[i+3] == '\n') {
+            return response.length - (i + 4);
+        }
+        i = i + 1;
+    }
+    return 0;
+}
+
+let n = 100;
+if (args.length > 1) {
+    n = parse_int(args[1]);
+}
+
+let total_bytes = 0;
+let i = 0;
+while (i < n) {
+    let request = build_request(i);
+    let response = build_response(i);
+
+    total_bytes = total_bytes + find_body(response);
+    total_bytes = total_bytes + request.length + response.length;
+    i = i + 1;
+}
+
+print(total_bytes);

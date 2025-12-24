@@ -28,7 +28,7 @@ usage() {
     echo "  --timeout N     Timeout per iteration in seconds (default: 60)"
     echo "  --help, -h      Show this help"
     echo ""
-    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, quicksort, binary_tree, graph_bfs, json_serialize, json_deserialize, hash_sha256"
+    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, quicksort, binary_tree, graph_bfs, json_serialize, json_deserialize, hash_sha256, http_test"
     echo "            (leave empty to run all)"
 }
 
@@ -92,6 +92,9 @@ get_input() {
             [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
         hash_sha256)
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
+            ;;
+        http_test)
             [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
     esac
@@ -301,7 +304,7 @@ run_all() {
     if [[ -n "$BENCHMARK" ]]; then
         benchmarks="$BENCHMARK"
     else
-        benchmarks="fib array_sum string_concat primes_sieve quicksort binary_tree graph_bfs json_serialize json_deserialize hash_sha256"
+        benchmarks="fib array_sum string_concat primes_sieve quicksort binary_tree graph_bfs json_serialize json_deserialize hash_sha256 http_test"
     fi
 
     local languages="c hemlockc hemlock python javascript ruby"
