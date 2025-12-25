@@ -28,7 +28,7 @@ usage() {
     echo "  --timeout N     Timeout per iteration in seconds (default: 60)"
     echo "  --help, -h      Show this help"
     echo ""
-    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, quicksort, binary_tree, graph_bfs, json_serialize, json_deserialize, hash_sha256, http_test"
+    echo "Benchmarks: fib, array_sum, string_concat, primes_sieve, quicksort, binary_tree, graph_bfs, json_serialize, json_deserialize, hash_sha256, http_test, matrix_multiply, merge_sort, hash_table"
     echo "            (leave empty to run all)"
 }
 
@@ -95,6 +95,15 @@ get_input() {
             [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
         http_test)
+            [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
+            ;;
+        matrix_multiply)
+            [[ $QUICK_MODE -eq 1 ]] && echo 100 || echo 200
+            ;;
+        merge_sort)
+            [[ $QUICK_MODE -eq 1 ]] && echo 10000 || echo 100000
+            ;;
+        hash_table)
             [[ $QUICK_MODE -eq 1 ]] && echo 1000 || echo 10000
             ;;
     esac

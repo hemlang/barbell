@@ -1,0 +1,90 @@
+// Merge sort benchmark - Hemlock
+
+fn parse_int(s) {
+    let result = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let c = s[idx];
+        let code: i32 = c;
+        let zero: i32 = '0';
+        result = result * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return result;
+}
+
+fn merge(arr, left, mid, right, temp) {
+    let i = left;
+    let j = mid + 1;
+    let k = left;
+
+    while (i <= mid && j <= right) {
+        if (arr[i] <= arr[j]) {
+            temp[k] = arr[i];
+            i = i + 1;
+        } else {
+            temp[k] = arr[j];
+            j = j + 1;
+        }
+        k = k + 1;
+    }
+
+    while (i <= mid) {
+        temp[k] = arr[i];
+        i = i + 1;
+        k = k + 1;
+    }
+
+    while (j <= right) {
+        temp[k] = arr[j];
+        j = j + 1;
+        k = k + 1;
+    }
+
+    let x = left;
+    while (x <= right) {
+        arr[x] = temp[x];
+        x = x + 1;
+    }
+}
+
+fn merge_sort(arr, left, right, temp) {
+    if (left < right) {
+        let mid = left + divi(right - left, 2);
+        merge_sort(arr, left, mid, temp);
+        merge_sort(arr, mid + 1, right, temp);
+        merge(arr, left, mid, right, temp);
+    }
+}
+
+let n = 100000;
+if (args.length > 1) {
+    n = parse_int(args[1]);
+}
+
+// Fill with descending values
+let arr = [];
+let k = n;
+while (k > 0) {
+    arr.push(k);
+    k = k - 1;
+}
+
+// Create temp array
+let temp = [];
+let i = 0;
+while (i < n) {
+    temp.push(0);
+    i = i + 1;
+}
+
+merge_sort(arr, 0, n - 1, temp);
+
+// Print checksum
+let sum = 0;
+i = 0;
+while (i < n) {
+    sum = sum + arr[i];
+    i = i + 1;
+}
+print(sum);
