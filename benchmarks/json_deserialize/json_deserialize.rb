@@ -3,6 +3,8 @@ require 'json'
 
 n = ARGV[0] ? ARGV[0].to_i : 100000
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 total_id = 0
 
 n.times do |i|
@@ -11,4 +13,6 @@ n.times do |i|
     total_id += record["id"]
 end
 
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
 puts total_id

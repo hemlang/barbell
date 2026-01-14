@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/time.h>
 
 // SHA-256 constants
 static const uint32_t K[64] = {
@@ -116,6 +117,9 @@ int main(int argc, char *argv[]) {
     uint8_t hash[32];
     int i;
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     // Hash repeatedly, using previous hash as part of next input
     for (i = 0; i < iterations; i++) {
         sha256(data, 48, hash);
@@ -128,6 +132,11 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < 32; i++) {
         checksum += hash[i];
     }
+
+    gettimeofday(&end, NULL);
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    fprintf(stderr, "TIME_MS:%.2f\n", elapsed_ms);
+
     printf("%d\n", checksum);
 
     return 0;

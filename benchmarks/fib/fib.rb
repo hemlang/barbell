@@ -4,4 +4,10 @@ def fib(n)
 end
 
 n = ARGV[0] ? ARGV[0].to_i : 35
-puts fib(n)
+
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+result = fib(n)
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
+puts result

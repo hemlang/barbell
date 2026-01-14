@@ -114,16 +114,15 @@ now_ms() {
     perl -MTime::HiRes=time -e 'printf "%d\n", time * 1000'
 }
 
-# Time a command and return milliseconds
+# Run a command and extract internal TIME_MS from stderr
 # Returns exit code of command; time is echoed, errors go to stderr
 # Exit code 124 indicates timeout
+# Benchmarks should print "TIME_MS:<milliseconds>" to stderr
 time_cmd() {
-    local start end exit_code
+    local exit_code
     local error_file=$(mktemp)
-    start=$(now_ms)
     timeout "$TIMEOUT" bash -c "$*" > /dev/null 2>"$error_file"
     exit_code=$?
-    end=$(now_ms)
     if [[ $exit_code -eq 124 ]]; then
         rm -f "$error_file"
         echo "TIMEOUT after ${TIMEOUT}s" >&2
@@ -134,8 +133,15 @@ time_cmd() {
         rm -f "$error_file"
         return $exit_code
     fi
+    # Extract TIME_MS value from stderr
+    local time_ms=$(grep -o 'TIME_MS:[0-9.]*' "$error_file" | head -1 | cut -d: -f2)
     rm -f "$error_file"
-    echo $((end - start))
+    if [[ -z "$time_ms" ]]; then
+        echo "No TIME_MS output found" >&2
+        return 3
+    fi
+    # Round to integer
+    printf "%.0f" "$time_ms"
 }
 
 # Run a single benchmark for a language

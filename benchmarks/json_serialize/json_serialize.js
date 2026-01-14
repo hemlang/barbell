@@ -1,6 +1,8 @@
 // JSON serialization benchmark - JavaScript
 const n = parseInt(process.argv[2]) || 100000;
 
+const start = performance.now();
+
 // Create a record to serialize
 const record = {
     id: 12345,
@@ -19,4 +21,6 @@ for (let i = 0; i < n; i++) {
     totalLen += jsonStr.length;
 }
 
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
 console.log(totalLen);

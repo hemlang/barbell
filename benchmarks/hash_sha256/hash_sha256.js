@@ -127,6 +127,8 @@ for (let i = 0; i < message.length; i++) {
     data[i] = message.charCodeAt(i);
 }
 
+const start = performance.now();
+
 let hashResult;
 for (let i = 0; i < iterations; i++) {
     hashResult = sha256(data.slice(0, 48));
@@ -137,4 +139,7 @@ for (let i = 0; i < iterations; i++) {
 
 // Print checksum
 const checksum = hashResult.reduce((a, b) => a + b, 0);
+
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
 console.log(checksum);

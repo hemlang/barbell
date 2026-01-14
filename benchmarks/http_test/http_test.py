@@ -1,7 +1,10 @@
 import sys
+import time
 
 def main():
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 100
+
+    start = time.perf_counter()
     total_bytes = 0
 
     for i in range(n):
@@ -29,6 +32,8 @@ def main():
             total_bytes += len(parts[1])
         total_bytes += len(request) + len(response)
 
+    elapsed = (time.perf_counter() - start) * 1000
+    print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
     print(total_bytes)
 
 main()

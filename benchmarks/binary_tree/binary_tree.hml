@@ -1,4 +1,5 @@
 // Binary tree benchmark - Hemlock
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let result = 0;
@@ -42,6 +43,8 @@ if (args.length > 1) {
     n = parse_int(args[1]);
 }
 
+let start = time_ms();
+
 let tree_root = null;
 
 // Insert values using LCG for pseudo-random values
@@ -55,4 +58,7 @@ while (k < n) {
 }
 
 // Sum all values via in-order traversal
-print(inorder_sum(tree_root));
+let result = inorder_sum(tree_root);
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
+print(result);

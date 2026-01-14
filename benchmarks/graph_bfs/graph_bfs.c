@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 typedef struct {
     int *neighbors;
@@ -81,6 +82,9 @@ int bfs(AdjList *adj, int n, int start) {
 int main(int argc, char *argv[]) {
     int n = argc > 1 ? atoi(argv[1]) : 10000;
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     AdjList *adj = calloc(n, sizeof(AdjList));
 
     // Build a connected graph: each node connects to a few others
@@ -104,6 +108,11 @@ int main(int argc, char *argv[]) {
 
     // Run BFS from node 0
     int visited_count = bfs(adj, n, 0);
+
+    gettimeofday(&end, NULL);
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    fprintf(stderr, "TIME_MS:%.2f\n", elapsed_ms);
+
     printf("%d\n", visited_count);
 
     // Cleanup

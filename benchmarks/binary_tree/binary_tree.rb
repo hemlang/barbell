@@ -26,6 +26,8 @@ end
 
 n = ARGV[0] ? ARGV[0].to_i : 100000
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 root = nil
 
 # Insert values using LCG for pseudo-random values
@@ -37,4 +39,8 @@ n.times do
 end
 
 # Sum all values via in-order traversal
-puts inorder_sum(root)
+result = inorder_sum(root)
+
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
+puts result

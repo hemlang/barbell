@@ -38,6 +38,8 @@ end
 
 n = ARGV[0] ? ARGV[0].to_i : 100000
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 # Fill with descending values
 arr = (1..n).to_a.reverse
 temp = Array.new(n, 0)
@@ -45,4 +47,8 @@ temp = Array.new(n, 0)
 merge_sort(arr, 0, n - 1, temp)
 
 # Print checksum
-puts arr.sum
+result = arr.sum
+
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
+puts result

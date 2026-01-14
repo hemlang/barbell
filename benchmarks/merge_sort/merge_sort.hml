@@ -1,4 +1,5 @@
 // Merge sort benchmark - Hemlock
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let result = 0;
@@ -62,6 +63,8 @@ if (args.length > 1) {
     n = parse_int(args[1]);
 }
 
+let start = time_ms();
+
 // Fill with descending values
 let arr = [];
 let k = n;
@@ -87,4 +90,7 @@ while (i < n) {
     sum = sum + arr[i];
     i = i + 1;
 }
+
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(sum);

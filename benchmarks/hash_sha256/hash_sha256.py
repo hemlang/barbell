@@ -2,6 +2,7 @@
 # Pure implementation for fair language comparison
 
 import sys
+import time
 
 # SHA-256 constants
 K = [
@@ -119,10 +120,15 @@ def sha256(data):
 iterations = int(sys.argv[1]) if len(sys.argv) > 1 else 100000
 data = list(b"benchmark test message for sha256 hashing!!!!!!!") + [0] * 16
 
+start = time.perf_counter()
+
 for _ in range(iterations):
     hash_result = sha256(data[:48])
     data[:32] = hash_result
 
 # Print checksum
 checksum = sum(hash_result)
+
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
 print(checksum)

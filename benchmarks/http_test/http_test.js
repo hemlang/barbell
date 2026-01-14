@@ -1,5 +1,7 @@
 function main() {
     const n = parseInt(process.argv[2]) || 100;
+
+    const start = performance.now();
     let totalBytes = 0;
 
     for (let i = 0; i < n; i++) {
@@ -27,6 +29,8 @@ function main() {
         totalBytes += request.length + response.length;
     }
 
+    const elapsed = performance.now() - start;
+    console.error(`TIME_MS:${elapsed.toFixed(2)}`);
     console.log(totalBytes);
 }
 

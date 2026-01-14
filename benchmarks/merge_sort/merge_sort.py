@@ -1,4 +1,5 @@
 import sys
+import time
 sys.setrecursionlimit(50000)
 
 def merge(arr, left, mid, right, temp):
@@ -35,6 +36,8 @@ def merge_sort(arr, left, right, temp):
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 100000
 
+start = time.perf_counter()
+
 # Fill with descending values
 arr = list(range(n, 0, -1))
 temp = [0] * n
@@ -42,4 +45,8 @@ temp = [0] * n
 merge_sort(arr, 0, n - 1, temp)
 
 # Print checksum
-print(sum(arr))
+result = sum(arr)
+
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
+print(result)

@@ -1,5 +1,7 @@
 const n = parseInt(process.argv[2]) || 200;
 
+const start = performance.now();
+
 // Initialize matrices
 const a = [];
 const b = [];
@@ -34,4 +36,7 @@ for (let i = 0; i < n; i++) {
         checksum += c[i][j];
     }
 }
+
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
 console.log(checksum.toFixed(6));

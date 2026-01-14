@@ -1,5 +1,7 @@
 const n = parseInt(process.argv[2]) || 100000;
 
+const start = performance.now();
+
 const ht = new Map();
 let checksum = 0;
 
@@ -29,4 +31,6 @@ for (let i = 0; i < n; i++) {
     }
 }
 
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
 console.log(checksum);

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/time.h>
 
 // Simple struct to deserialize into
 typedef struct {
@@ -103,6 +104,9 @@ int parse_record(const char *json, Record *rec) {
 int main(int argc, char *argv[]) {
     int n = argc > 1 ? atoi(argv[1]) : 100000;
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     // JSON string to parse
     const char *json_template = "{\"id\":%d,\"name\":\"benchmark_test\",\"value\":%.6f,\"active\":true,\"tags\":[1,2,3,4,5]}";
     char json_str[256];
@@ -116,6 +120,10 @@ int main(int argc, char *argv[]) {
         parse_record(json_str, &rec);
         total_id += rec.id;
     }
+
+    gettimeofday(&end, NULL);
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    fprintf(stderr, "TIME_MS:%.2f\n", elapsed_ms);
 
     printf("%ld\n", total_id);
     return 0;

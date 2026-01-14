@@ -1,5 +1,6 @@
 // JSON deserialization benchmark - Hemlock
 // Uses built-in .deserialize() method
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let result = 0;
@@ -34,6 +35,8 @@ if (args.length > 1) {
     n = parse_int(args[1]);
 }
 
+let start = time_ms();
+
 let total_id = 0;
 let i = 0;
 
@@ -47,4 +50,6 @@ while (i < n) {
     i = i + 1;
 }
 
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(total_id);

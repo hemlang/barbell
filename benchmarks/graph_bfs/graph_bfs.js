@@ -22,6 +22,8 @@ function bfs(adj, n, start) {
 
 const n = parseInt(process.argv[2]) || 10000;
 
+const start = performance.now();
+
 const adj = [];
 for (let i = 0; i < n; i++) {
     adj.push([]);
@@ -47,4 +49,7 @@ for (let i = 0; i < n; i++) {
 }
 
 // Run BFS from node 0
-console.log(bfs(adj, n, 0));
+const result = bfs(adj, n, 0);
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
+console.log(result);

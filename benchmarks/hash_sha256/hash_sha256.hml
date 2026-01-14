@@ -1,5 +1,6 @@
 // SHA-256 benchmark - Hemlock
 // Pure implementation for fair language comparison
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let result = 0;
@@ -210,6 +211,8 @@ while (data.length < 64) {
     data.push(0);
 }
 
+let start = time_ms();
+
 // Run benchmark iterations
 let hash_result = [];
 i = 0;
@@ -231,4 +234,7 @@ while (i < 32) {
     checksum = checksum + hash_result[i];
     i = i + 1;
 }
+
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(checksum);

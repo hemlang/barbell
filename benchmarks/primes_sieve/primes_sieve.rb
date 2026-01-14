@@ -1,5 +1,7 @@
 n = ARGV[0] ? ARGV[0].to_i : 1000000
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 sieve = Array.new(n + 1, false)
 
 i = 2
@@ -19,4 +21,6 @@ count = 0
   count += 1 unless sieve[i]
 end
 
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
 puts count

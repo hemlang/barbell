@@ -1,5 +1,7 @@
 n = ARGV[0] ? ARGV[0].to_i : 100000
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 ht = {}
 checksum = 0
 
@@ -25,4 +27,6 @@ n.times do |i|
   checksum += ht[key] if ht.key?(key)
 end
 
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
 puts checksum

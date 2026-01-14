@@ -1,6 +1,9 @@
 import sys
+import time
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 200
+
+start = time.perf_counter()
 
 # Initialize matrices
 a = [[float(i + j) / n for j in range(n)] for i in range(n)]
@@ -17,4 +20,7 @@ for i in range(n):
 
 # Compute checksum
 checksum = sum(sum(row) for row in c)
+
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
 print(f"{checksum:.6f}")

@@ -21,6 +21,8 @@ end
 
 n = ARGV[0] ? ARGV[0].to_i : 10000
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 adj = Array.new(n) { [] }
 
 # Build a connected graph: each node connects to a few others
@@ -41,4 +43,8 @@ n.times do |i|
 end
 
 # Run BFS from node 0
-puts bfs(adj, n, 0)
+result = bfs(adj, n, 0)
+
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
+puts result

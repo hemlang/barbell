@@ -1,6 +1,9 @@
 import sys
+import time
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 100000
+
+start = time.perf_counter()
 
 ht = {}
 checksum = 0
@@ -25,4 +28,6 @@ for i in range(n):
     if key in ht:
         checksum += ht[key]
 
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
 print(checksum)

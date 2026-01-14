@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 #define TABLE_SIZE 10007
 
@@ -76,6 +77,9 @@ void ht_delete(HashTable *ht, const char *key) {
 int main(int argc, char *argv[]) {
     int n = argc > 1 ? atoi(argv[1]) : 100000;
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     HashTable ht = {0};
     char key[32];
     long checksum = 0;
@@ -111,6 +115,10 @@ int main(int argc, char *argv[]) {
             checksum += val;
         }
     }
+
+    gettimeofday(&end, NULL);
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    fprintf(stderr, "TIME_MS:%.2f\n", elapsed_ms);
 
     printf("%ld\n", checksum);
     return 0;
