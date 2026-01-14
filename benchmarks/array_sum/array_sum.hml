@@ -1,4 +1,5 @@
 // Array sum benchmark - Hemlock
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let result = 0;
@@ -18,6 +19,8 @@ if (args.length > 1) {
     size = parse_int(args[1]);
 }
 
+let start = time_ms();
+
 let arr = [];
 let i = 0;
 while (i < size) {
@@ -32,4 +35,6 @@ while (i < size) {
     i = i + 1;
 }
 
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(sum);

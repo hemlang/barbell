@@ -1,8 +1,11 @@
 # JSON serialization benchmark - Python
 import sys
 import json
+import time
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 100000
+
+start = time.perf_counter()
 
 # Create a record to serialize
 record = {
@@ -21,4 +24,6 @@ for i in range(n):
     json_str = json.dumps(record)
     total_len += len(json_str)
 
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
 print(total_len)

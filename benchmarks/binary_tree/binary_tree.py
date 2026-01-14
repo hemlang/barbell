@@ -1,4 +1,5 @@
 import sys
+import time
 sys.setrecursionlimit(50000)
 
 class Node:
@@ -24,6 +25,8 @@ def inorder_sum(root):
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 100000
 
+start = time.perf_counter()
+
 root = None
 
 # Insert values using LCG for pseudo-random values
@@ -34,4 +37,7 @@ for i in range(n):
     root = insert(root, value)
 
 # Sum all values via in-order traversal
-print(inorder_sum(root))
+result = inorder_sum(root)
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
+print(result)

@@ -1,0 +1,82 @@
+// Hash table benchmark - Hemlock
+// Tests dictionary insert, lookup, and delete operations
+import { time_ms } from "@stdlib/time";
+
+fn parse_int(s) {
+    let result = 0;
+    let idx = 0;
+    while (idx < s.length) {
+        let c = s[idx];
+        let code: i32 = c;
+        let zero: i32 = '0';
+        result = result * 10 + (code - zero);
+        idx = idx + 1;
+    }
+    return result;
+}
+
+fn int_to_string(n) {
+    if (n == 0) {
+        return "0";
+    }
+    let result = "";
+    let num = n;
+    while (num > 0) {
+        let digit = num - divi(num, 10) * 10;
+        result = "" + digit + result;
+        num = divi(num, 10);
+    }
+    return result;
+}
+
+let n = 100000;
+if (args.length > 1) {
+    n = parse_int(args[1]);
+}
+
+let start = time_ms();
+
+let ht = {};
+let checksum = 0;
+
+// Insert n items
+let i = 0;
+while (i < n) {
+    let key = "key_" + int_to_string(i);
+    ht[key] = i * 2;
+    i = i + 1;
+}
+
+// Lookup all items
+i = 0;
+while (i < n) {
+    let key = "key_" + int_to_string(i);
+    let val = ht[key];
+    if (val != null) {
+        checksum = checksum + val;
+    }
+    i = i + 1;
+}
+
+// Delete half the items
+i = 0;
+while (i < n) {
+    let key = "key_" + int_to_string(i);
+    ht[key] = null;
+    i = i + 2;
+}
+
+// Lookup remaining items
+i = 0;
+while (i < n) {
+    let key = "key_" + int_to_string(i);
+    let val = ht[key];
+    if (val != null) {
+        checksum = checksum + val;
+    }
+    i = i + 1;
+}
+
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
+print(checksum);

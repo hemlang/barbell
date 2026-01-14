@@ -34,6 +34,10 @@ HEMLOCKC_BIN="../hemlock/hemlockc" ./run.sh
 - **json_serialize** - JSON serialization (object creation, string building)
 - **json_deserialize** - JSON parsing (string parsing, object creation)
 - **hash_sha256** - SHA-256 hashing (bitwise operations, loops, array manipulation)
+- **http_test** - HTTP request/response building and parsing (string operations)
+- **matrix_multiply** - Matrix multiplication (2D arrays, nested loops, floating point)
+- **merge_sort** - Merge sort algorithm (recursion, array copying)
+- **hash_table** - Hash table operations (dictionary insert, lookup, delete)
 
 ## Notes
 

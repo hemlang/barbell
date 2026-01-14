@@ -4,4 +4,9 @@ function fib(n) {
 }
 
 const n = parseInt(process.argv[2]) || 35;
-console.log(fib(n));
+
+const start = performance.now();
+const result = fib(n);
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
+console.log(result);

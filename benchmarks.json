@@ -24,6 +24,21 @@
       "description": "HTTP request/response building and parsing",
       "default_input": 10000,
       "quick_input": 1000
+    },
+    "matrix_multiply": {
+      "description": "Matrix multiplication (2D arrays, nested loops)",
+      "default_input": 200,
+      "quick_input": 100
+    },
+    "merge_sort": {
+      "description": "Merge sort algorithm (recursion, array copying)",
+      "default_input": 100000,
+      "quick_input": 10000
+    },
+    "hash_table": {
+      "description": "Hash table insert, lookup, delete operations",
+      "default_input": 100000,
+      "quick_input": 10000
     }
   },
   "languages": {

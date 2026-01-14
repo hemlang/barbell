@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 // Simple struct to serialize
 typedef struct {
@@ -23,6 +24,9 @@ int serialize_record(Record *r, char *buf, size_t buf_size) {
 int main(int argc, char *argv[]) {
     int n = argc > 1 ? atoi(argv[1]) : 100000;
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     // Create a record to serialize
     Record rec = {
         .id = 12345,
@@ -41,6 +45,10 @@ int main(int argc, char *argv[]) {
         int len = serialize_record(&rec, buffer, sizeof(buffer));
         total_len += len;
     }
+
+    gettimeofday(&end, NULL);
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    fprintf(stderr, "TIME_MS:%.2f\n", elapsed_ms);
 
     printf("%ld\n", total_len);
     return 0;

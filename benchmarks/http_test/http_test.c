@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 // Build an HTTP request and parse a response N times
 int main(int argc, char *argv[]) {
     int n = argc > 1 ? atoi(argv[1]) : 100;
     int total_bytes = 0;
+
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
 
     for (int i = 0; i < n; i++) {
         // Build HTTP request
@@ -34,6 +38,10 @@ int main(int argc, char *argv[]) {
         }
         total_bytes += req_len + resp_len;
     }
+
+    gettimeofday(&end, NULL);
+    double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
+    fprintf(stderr, "TIME_MS:%.2f\n", elapsed_ms);
 
     printf("%d\n", total_bytes);
     return 0;

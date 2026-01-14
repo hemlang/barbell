@@ -1,4 +1,5 @@
 // String concatenation benchmark - Hemlock
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let val = 0;
@@ -18,6 +19,8 @@ if (args.length > 1) {
     count = parse_int(args[1]);
 }
 
+let start = time_ms();
+
 let str = "";
 let i = 0;
 while (i < count) {
@@ -25,4 +28,6 @@ while (i < count) {
     i = i + 1;
 }
 
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(str.length);

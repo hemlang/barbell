@@ -1,5 +1,6 @@
 // JSON serialization benchmark - Hemlock
 // Uses built-in .serialize() method
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let result = 0;
@@ -18,6 +19,8 @@ let n = 100000;
 if (args.length > 1) {
     n = parse_int(args[1]);
 }
+
+let start = time_ms();
 
 let name = "benchmark_test";
 let active = true;
@@ -39,4 +42,6 @@ while (i < n) {
     i = i + 1;
 }
 
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(total_len);

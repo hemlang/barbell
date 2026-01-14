@@ -1,4 +1,5 @@
 import sys
+import time
 from collections import deque
 
 def bfs(adj, n, start):
@@ -20,6 +21,8 @@ def bfs(adj, n, start):
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 10000
 
+start = time.perf_counter()
+
 adj = [[] for _ in range(n)]
 
 # Build a connected graph: each node connects to a few others
@@ -38,4 +41,7 @@ for i in range(n):
             adj[i].append(target)
 
 # Run BFS from node 0
-print(bfs(adj, n, 0))
+result = bfs(adj, n, 0)
+elapsed = (time.perf_counter() - start) * 1000
+print(f"TIME_MS:{elapsed:.2f}", file=sys.stderr)
+print(result)

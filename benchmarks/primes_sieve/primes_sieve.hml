@@ -1,4 +1,5 @@
 // Sieve of Eratosthenes benchmark - Hemlock
+import { time_ms } from "@stdlib/time";
 
 fn parse_int(s) {
     let val = 0;
@@ -17,6 +18,8 @@ let limit = 1000000;
 if (args.length > 1) {
     limit = parse_int(args[1]);
 }
+
+let start = time_ms();
 
 // Initialize sieve array
 let sieve = [];
@@ -49,4 +52,6 @@ while (i <= limit) {
     i = i + 1;
 }
 
+let elapsed = time_ms() - start;
+eprint("TIME_MS:" + elapsed);
 print(count);

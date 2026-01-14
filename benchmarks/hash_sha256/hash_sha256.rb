@@ -126,6 +126,8 @@ iterations = ARGV[0] ? ARGV[0].to_i : 100000
 message = "benchmark test message for sha256 hashing!!!!!!!"
 data = message.bytes + [0] * 16
 
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
 hash_result = nil
 iterations.times do
   hash_result = sha256(data[0, 48])
@@ -134,4 +136,7 @@ end
 
 # Print checksum
 checksum = hash_result.sum
+
+elapsed = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
+STDERR.puts "TIME_MS:#{format('%.2f', elapsed)}"
 puts checksum

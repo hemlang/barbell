@@ -25,6 +25,8 @@ function inorderSum(root) {
 
 const n = parseInt(process.argv[2]) || 100000;
 
+const start = performance.now();
+
 let root = null;
 
 // Insert values using LCG for pseudo-random values
@@ -36,4 +38,7 @@ for (let i = 0; i < n; i++) {
 }
 
 // Sum all values via in-order traversal
-console.log(inorderSum(root));
+const result = inorderSum(root);
+const elapsed = performance.now() - start;
+console.error(`TIME_MS:${elapsed.toFixed(2)}`);
+console.log(result);
